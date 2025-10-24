@@ -1,0 +1,25 @@
+Package: PubMatrixR
+Version: 2.0
+Title: Search Entrez Using Boolean AND Queries
+Author: Tyler Laird [aut, cre], Toledo Enrique [ctb]
+Maintainer: Tyler Laird <tylerscottlaird@gmail.com>
+Authors@R: c(person("Tyler", "Laird", email = "tylerscottlaird@gmail.com",
+    role = c("aut", "cre")),
+    person("Toledo", "Enrique", email = "enriquetoledo@gmail.com", role = "ctb"))
+Description: Search two lists against each other on PubMed and obtain a resulting pairwise matrix. This package performs systematic literature searches using Boolean AND queries and creates co-occurrence matrices showing publication counts for term combinations. 
+Depends: R (>= 3.1.0)
+License: GPL-2
+Encoding: UTF-8
+Imports:
+    pbapply,
+    stringr,
+    pheatmap,
+    xml2    
+RoxygenNote: 7.3.3
+Suggests: 
+    knitr,
+    rmarkdown,
+    testthat (>= 3.0.0),
+    msigdf,
+    dplyr
+VignetteBuilder: knitr
