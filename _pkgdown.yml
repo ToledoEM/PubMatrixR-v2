@@ -1,0 +1,22 @@
+url: https://toledoem.github.io/PubMatrixR-v2/
+
+destination: docs/
+
+template:
+  bootstrap: 5
+
+navbar:
+  title: PubMatrixR
+  left:
+    - text: Home
+      href: index.html
+    - text: Reference
+      href: reference/index.html
+    - text: Articles
+      href: articles/index.html
+
+articles:
+  - title: Vignettes
+    contents:
+      - vignette
+      - WntExample

@@ -46,7 +46,7 @@ PubMatrixR is an R package designed to analyze literature co-occurrence patterns
 
 ### Acknowledgments
 
-This package is a fork of the original [PubMatrixR](https://github.com/tslaird/PubMatrixR) by tslaird. Our gratitude to the original author.
+This package is a fork of the original [PubMatrixR](https://github.com/tslaird/PubMatrixR) by tslaird. 
 
 ### NCBI API Key (Recommended)
 

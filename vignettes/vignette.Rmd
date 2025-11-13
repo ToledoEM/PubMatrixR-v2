@@ -28,8 +28,8 @@ knitr::opts_chunk$set(
 library(PubMatrixR)
 library(knitr)
 library(kableExtra)
-#library(msigdf)
 library(dplyr)
+library(msigdf)
 library(pheatmap)
 library(ggplot2)
 ```
@@ -59,7 +59,7 @@ To obtain your free NCBI API key, visit: <https://support.nlm.nih.gov/kbArticle/
 
 Once you have your API key, you can use it in PubMatrixR like this:
 
-```r
+```{r, eval=FALSE}
 result <- PubMatrix(A = gene_set_1,
                    B = gene_set_2,
                    API.key = "your_api_key_here",
