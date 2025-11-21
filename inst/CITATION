@@ -1,0 +1,15 @@
+citHeader("To cite PubMatrixR in publications, please use the original work following:")
+
+citEntry(
+  entry = "Article",
+  title = "PubMatrix: a tool for multiplex literature mining",
+  author = "Becker KG, Hosack DA, Dennis G, Lempicki RA, Bright TJ, Cheadle C, Engel J",
+  journal = "BMC Bioinformatics",
+  year = "2003",
+  volume = "4",
+  pages = "61",
+  doi = "10.1186/1471-2105-4-61",
+  url = "https://pmc.ncbi.nlm.nih.gov/articles/PMC317283/"
+)
+
+citFooter("For more information, visit the PubMatrixR GitHub repository: https://github.com/ToledoEM/PubMatrixR")

@@ -8,7 +8,7 @@ Authors@R: c(person("Tyler", "Laird", email = "tylerscottlaird@gmail.com",
     person("Toledo", "Enrique", email = "enriquetoledo@gmail.com", role = c("ctb", "cre")))
 Description: Search two lists against each other on PubMed and obtain a resulting pairwise matrix. This package performs systematic literature searches using Boolean AND queries and creates co-occurrence matrices showing publication counts for term combinations. 
 Depends: R (>= 3.1.0)
-License: GPL-2
+License: MIT + file LICENSE
 Encoding: UTF-8
 Imports:
     pbapply,

@@ -1,7 +1,7 @@
 # PubMatrixR v2
 
-[![R](https://img.shields.io/badge/R-%3E%3D3.1.0-blue.svg)](https://www.r-project.org/)
-[![License: GPL-2](https://img.shields.io/badge/License-GPL--2-green.svg)](https://www.gnu.org/licenses/old-licenses/gpl-2.0.en.html)
+<img src="https://toledoem.github.io/img/LogoPubmatrix.png" align="right" width=150/>
+
 
 - Forked from: [https://github.com/tslaird/PubMatrixR](https://github.com/tslaird/PubMatrixR)
 - Based on paper : [PubMatrix: a tool for multiplex literature mining](https://pmc.ncbi.nlm.nih.gov/articles/PMC317283/) of **Becker KG et al. BMC Bioinformatics. 2003 Dec 10;4:61. doi: 10.1186/1471-2105-4-61**
@@ -339,3 +339,7 @@ PubMatrixR is particularly useful for:
 - Consider breaking into smaller sub-searches
 - Use more specific date ranges
 - Filter gene lists to most relevant terms
+
+## License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
