@@ -53,7 +53,7 @@ plot_pubmatrix_heatmap <- function(matrix,
     if (is.character(matrix)) {
       # Attempt to coerce the character matrix to numeric.
       # apply is used for column-wise coercion, preserving column names.
-      suppressWarnings(matrix_coerced <- as.matrix(apply(matrix, 2, as.numeric)))
+      matrix_coerced <- as.matrix(apply(matrix, 2, as.numeric))
       
       # Check if coercion failed because of non-numeric strings (like formulas)
       if (all(is.na(matrix_coerced[!is.na(matrix)]))) {
@@ -105,8 +105,8 @@ plot_pubmatrix_heatmap <- function(matrix,
     n <- nrow(x_binary)
     dist_matrix <- matrix(0, n, n)
     
-    for (i in 1:(n-1)) {
-      for (j in (i+1):n) {
+    for (i in seq_len(n-1)) {
+      for (j in seq.int(i+1, n)) {
         intersection <- sum(x_binary[i,] & x_binary[j,])
         union <- sum(x_binary[i,] | x_binary[j,])
         

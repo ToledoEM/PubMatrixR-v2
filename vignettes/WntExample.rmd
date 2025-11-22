@@ -105,9 +105,10 @@ kable(result,
         caption = "Co-occurrence Matrix: WNT Genes (Publication Counts)",
         align = "c",
         format = "html") %>%
-    kableExtra::kable_styling(bootstrap_options = c("striped", "hover", "condensed"),
-                             full_width = FALSE,
-                             position = "center") %>%
+    kableExtra::kable_styling(
+      bootstrap_options = c("striped", "hover", "condensed"),
+      full_width = FALSE,
+      position = "center") %>%
     kableExtra::add_header_above(c(" " = 1, "Wnt Genes" = length(A)))
 ```
 

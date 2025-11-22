@@ -1,13 +1,16 @@
 Package: PubMatrixR
-Version: 1.0
+Version: 1.0.0
 Title: Search Entrez Using Boolean AND Queries
 Authors@R: c(person("Tyler", "Laird", email = "tylerscottlaird@gmail.com",
     role = "aut"),
-    person("Toledo", "Enrique", email = "enriquetoledo@gmail.com", role = c("ctb", "cre","man")))
+    person("Toledo", "Enrique", email = "enriquetoledo@gmail.com", role = c("ctb", "cre"),
+    comment = c(ORCID = "0000-0002-1460-4708")))
 Description: Search two lists against each other on PubMed and obtain a resulting pairwise matrix. This package performs systematic literature searches using Boolean AND queries and creates co-occurrence matrices showing publication counts for term combinations. 
 Depends: R (>= 3.1.0)
 License: MIT + file LICENSE
 Encoding: UTF-8
+URL: https://github.com/ToledoEM/PubMatrixR-v2
+BugReports: https://github.com/ToledoEM/PubMatrixR-v2/issues
 Imports:
     pbapply,
     stringr,
