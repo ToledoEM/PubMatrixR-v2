@@ -13,7 +13,9 @@ plot_pubmatrix_heatmap(
   color_palette = NULL,
   filename = NULL,
   width = 10,
-  height = 8
+  height = 8,
+  cellwidth = NULL,
+  cellheight = NULL
 )
 }
 \arguments{
@@ -34,6 +36,10 @@ plot_pubmatrix_heatmap(
 \item{width}{Width of saved plot in inches. Default is 10}
 
 \item{height}{Height of saved plot in inches. Default is 8}
+
+\item{cellwidth}{Optional numeric cell width for pheatmap (in pixels). Default `NULL` lets pheatmap auto-size.}
+
+\item{cellheight}{Optional numeric cell height for pheatmap (in pixels). Default `NULL` lets pheatmap auto-size.}
 }
 \value{
 A pheatmap object (invisible)
@@ -43,9 +49,9 @@ This function creates a heatmap displaying Jaccard distance values calculated fr
 a PubMatrix result matrix, with Euclidean distance clustering for rows and columns.
 }
 \details{
-The function displays Jaccard distance values in the heatmap cells (same as compute_jaccard_matrix) 
-and uses Euclidean distance for clustering rows and columns. Jaccard distance is calculated as 
-1 - (intersection/union) where intersection is the number of common non-zero elements 
+The function displays Jaccard distance values in the heatmap cells (same as compute_jaccard_matrix)
+and uses Euclidean distance for clustering rows and columns. Jaccard distance is calculated as
+1 - (intersection/union) where intersection is the number of common non-zero elements
 and union is the total number of non-zero elements. NA values in the input matrix are converted to 0 before calculation to ensure stability.
 }
 \examples{

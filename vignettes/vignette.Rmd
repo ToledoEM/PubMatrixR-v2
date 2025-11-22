@@ -208,7 +208,7 @@ print(p2)
 
 The heatmap displays overlap percentages calculated from the publication co-occurrence counts:
 
-```{r heatmap_with_numbers_asymmetric, dpi=150, fig.cap="Overlap percentage heatmap with values displayed in each cell"}
+```{r heatmap_with_numbers_asymmetric, fig.width=8, fig.height=6, out.width="100%", dpi=150, fig.cap="Overlap percentage heatmap with values displayed in each cell"}
 plot_pubmatrix_heatmap(result,
   title = "WNT-Obesity Gene Overlap Percentages",
   show_numbers = TRUE,
@@ -221,7 +221,7 @@ plot_pubmatrix_heatmap(result,
 
 For a cleaner visualization without numbers, useful for presentations:
 
-```{r heatmap_clean_asymmetric, dpi=150, fig.cap="Co-occurrence heatmap without numbers for better visual clarity"}
+```{r heatmap_clean_asymmetric, fig.width=8, fig.height=6, out.width="100%", dpi=150, fig.cap="Co-occurrence heatmap without numbers for better visual clarity"}
 plot_pubmatrix_heatmap(result,
   title = "WNT-Obesity Gene Co-occurrence (Clean)",
   show_numbers = FALSE,
@@ -333,7 +333,7 @@ print(p4)
 
 The heatmap displays overlap percentages calculated from the publication co-occurrence counts:
 
-```{r heatmap_with_numbers_asymmetric2, out.width="100%", dpi=150, fig.cap="Overlap percentage heatmap with values displayed in each cell"}
+```{r heatmap_with_numbers_asymmetric2, fig.width=8, fig.height=6, out.width="100%", dpi=150, fig.cap="Overlap percentage heatmap with values displayed in each cell"}
 plot_pubmatrix_heatmap(result,
   title = "Asymmetric Gene Lists Overlap Percentages",
   show_numbers = TRUE,
@@ -346,7 +346,7 @@ plot_pubmatrix_heatmap(result,
 
 For a cleaner visualization without numbers, useful for presentations:
 
-```{r heatmap_clean_asymmetric2, out.width="100%", dpi=150, fig.cap="Co-occurrence heatmap without numbers for better visual clarity"}
+```{r heatmap_clean_asymmetric2, fig.width=8, fig.height=6, out.width="100%", dpi=150, fig.cap="Co-occurrence heatmap without numbers for better visual clarity"}
 plot_pubmatrix_heatmap(result,
   title = "Asymmetric Gene Lists Co-occurrence (Clean)",
   show_numbers = FALSE,

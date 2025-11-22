@@ -12,6 +12,8 @@
 #' @param filename Optional filename to save the heatmap. If NULL, displays the plot
 #' @param width Width of saved plot in inches. Default is 10
 #' @param height Height of saved plot in inches. Default is 8
+#' @param cellwidth Optional numeric cell width for pheatmap (in pixels). Default `NA` lets pheatmap auto-size.
+#' @param cellheight Optional numeric cell height for pheatmap (in pixels). Default `NA` lets pheatmap auto-size.
 #' @details
 #' The function displays Jaccard distance values in the heatmap cells (same as compute_jaccard_matrix)
 #' and uses Euclidean distance for clustering rows and columns. Jaccard distance is calculated as
@@ -29,15 +31,17 @@
 #'
 #' # Create heatmap
 #' plot_pubmatrix_heatmap(test_matrix, title = "Test Heatmap")
-plot_pubmatrix_heatmap <- function(matrix,
+plot_pubmatrix_heatmap <- function(matrix, 
                                    title = "PubMatrix Co-occurrence Heatmap",
                                    cluster_rows = TRUE,
-                                   cluster_cols = TRUE,
+                                   cluster_cols = TRUE, 
                                    show_numbers = TRUE,
                                    color_palette = NULL,
                                    filename = NULL,
                                    width = 10,
-                                   height = 8) {
+                                   height = 8,
+                                   cellwidth = NA,
+                                   cellheight = NA) {
   # --- Input validation and coercion ---
   if (is.data.frame(matrix)) {
     # Convert data frame to matrix
@@ -169,13 +173,12 @@ plot_pubmatrix_heatmap <- function(matrix,
   }
 
   # Check for variation in the data - if all values are the same, throw an error
-  overlap_range <- range(overlap_matrix, na.rm = TRUE)
-  if (diff(overlap_range) == 0) {
-    stop(
-      "Cannot create heatmap: All overlap percentages are identical (",
-      overlap_range[1], "%). No variation in data to visualize."
-    )
-  }
+    overlap_range <- range(overlap_matrix, na.rm = TRUE)
+    # Guard against unexpected empty ranges (avoid 'argument is of length zero')
+    if (length(overlap_range) < 2 || (length(diff(overlap_range)) > 0 && diff(overlap_range) == 0)) {
+      stop("Cannot create heatmap: All overlap percentages are identical (", 
+           overlap_range[1], "%). No variation in data to visualize.")
+    }
 
   # Create the heatmap
   if (!is.null(filename)) {
@@ -184,20 +187,20 @@ plot_pubmatrix_heatmap <- function(matrix,
   }
 
   heatmap_plot <- pheatmap::pheatmap(
-    overlap_matrix, # Use overlap percentage matrix for display
+    overlap_matrix,  # Use overlap percentage matrix for display
     main = title,
     color = color_palette,
     cluster_rows = use_row_clustering,
     cluster_cols = use_col_clustering,
-    clustering_distance_rows = "euclidean", # Use Euclidean for clustering
-    clustering_distance_cols = "euclidean", # Use Euclidean for clustering
+    clustering_distance_rows = "euclidean",  # Use Euclidean for clustering
+    clustering_distance_cols = "euclidean",  # Use Euclidean for clustering
     clustering_method = "average",
     display_numbers = show_numbers,
     number_color = "black",
     fontsize = 16,
     fontsize_number = 14,
-    cellwidth = 80,
-    cellheight = 80,
+    cellwidth = cellwidth,
+    cellheight = cellheight,
     border_color = "lightgray",
     show_rownames = TRUE,
     show_colnames = TRUE,
