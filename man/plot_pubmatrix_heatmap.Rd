@@ -14,8 +14,9 @@ plot_pubmatrix_heatmap(
   filename = NULL,
   width = 10,
   height = 8,
-  cellwidth = NULL,
-  cellheight = NULL
+  cellwidth = NA,
+  cellheight = NA,
+  scale_font = TRUE
 )
 }
 \arguments{
@@ -37,9 +38,9 @@ plot_pubmatrix_heatmap(
 
 \item{height}{Height of saved plot in inches. Default is 8}
 
-\item{cellwidth}{Optional numeric cell width for pheatmap (in pixels). Default `NULL` lets pheatmap auto-size.}
+\item{cellwidth}{Optional numeric cell width for pheatmap (in pixels). Default `NA` lets pheatmap auto-size.}
 
-\item{cellheight}{Optional numeric cell height for pheatmap (in pixels). Default `NULL` lets pheatmap auto-size.}
+\item{cellheight}{Optional numeric cell height for pheatmap (in pixels). Default `NA` lets pheatmap auto-size.}
 }
 \value{
 A pheatmap object (invisible)
@@ -60,6 +61,21 @@ test_matrix <- matrix(c(1, 2, 3, 4), nrow = 2, ncol = 2)
 rownames(test_matrix) <- c("Gene1", "Gene2")
 colnames(test_matrix) <- c("GeneA", "GeneB")
 
-# Create heatmap
+# Create heatmap using the helper
 plot_pubmatrix_heatmap(test_matrix, title = "Test Heatmap")
+
+# Equivalent using pheatmap directly:
+# Compute overlap matrix as the function does (here trivial because counts are raw)
+overlap_matrix <- test_matrix
+pheatmap::pheatmap(
+  overlap_matrix,
+  main = "Test Heatmap (pheatmap)",
+  color = colorRampPalette(c("#fee5d9", "#cb181d"))(100),
+  display_numbers = TRUE,
+  fontsize = 16,
+  fontsize_number = 14,
+  border_color = "lightgray",
+  show_rownames = TRUE,
+  show_colnames = TRUE
+)
 }

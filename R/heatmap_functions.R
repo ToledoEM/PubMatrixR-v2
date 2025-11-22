@@ -29,8 +29,23 @@
 #' rownames(test_matrix) <- c("Gene1", "Gene2")
 #' colnames(test_matrix) <- c("GeneA", "GeneB")
 #'
-#' # Create heatmap
+#' # Create heatmap using the helper
 #' plot_pubmatrix_heatmap(test_matrix, title = "Test Heatmap")
+#'
+#' # Equivalent using pheatmap directly:
+#' # Compute overlap matrix as the function does (here trivial because counts are raw)
+#' overlap_matrix <- test_matrix
+#' pheatmap::pheatmap(
+#'   overlap_matrix,
+#'   main = "Test Heatmap (pheatmap)",
+#'   color = colorRampPalette(c("#fee5d9", "#cb181d"))(100),
+#'   display_numbers = TRUE,
+#'   fontsize = 16,
+#'   fontsize_number = 14,
+#'   border_color = "lightgray",
+#'   show_rownames = TRUE,
+#'   show_colnames = TRUE
+#' )
 plot_pubmatrix_heatmap <- function(matrix, 
                                    title = "PubMatrix Co-occurrence Heatmap",
                                    cluster_rows = TRUE,
@@ -41,7 +56,8 @@ plot_pubmatrix_heatmap <- function(matrix,
                                    width = 10,
                                    height = 8,
                                    cellwidth = NA,
-                                   cellheight = NA) {
+                                   cellheight = NA,
+                                   scale_font = TRUE) {
   # --- Input validation and coercion ---
   if (is.data.frame(matrix)) {
     # Convert data frame to matrix
@@ -186,6 +202,12 @@ plot_pubmatrix_heatmap <- function(matrix,
     png(filename = filename, width = width, height = height, units = "in", res = 300)
   }
 
+  # Dynamically compute font sizes based on matrix dimensions so labels scale
+  nmax <- max(nrow(overlap_matrix), ncol(overlap_matrix))
+  # heuristic: larger matrices -> smaller fonts; keep reasonable bounds
+  calculated_fontsize <- min(20, max(6, round(150 / nmax)))
+  calculated_fontsize_number <- max(5, round(calculated_fontsize * 0.9))
+
   heatmap_plot <- pheatmap::pheatmap(
     overlap_matrix,  # Use overlap percentage matrix for display
     main = title,
@@ -197,8 +219,8 @@ plot_pubmatrix_heatmap <- function(matrix,
     clustering_method = "average",
     display_numbers = show_numbers,
     number_color = "black",
-    fontsize = 16,
-    fontsize_number = 14,
+    fontsize = calculated_fontsize,
+    fontsize_number = calculated_fontsize_number,
     cellwidth = cellwidth,
     cellheight = cellheight,
     border_color = "lightgray",
@@ -207,6 +229,23 @@ plot_pubmatrix_heatmap <- function(matrix,
     angle_col = 45,
     legend = TRUE
   )
+      if (isTRUE(scale_font)) {
+        # If explicit cell dimensions provided, prefer them
+        if (!is.na(cellheight) || !is.na(cellwidth)) {
+          ref_dim <- if (!is.na(cellheight)) cellheight else cellwidth
+          # heuristic: font size ~ 35% of cell height (or width), bounded
+          calculated_fontsize <- min(20, max(5, round(ref_dim * 0.35)))
+          calculated_fontsize_number <- max(4, round(calculated_fontsize * 0.9))
+        } else {
+          # fallback heuristic based on overall matrix size
+          calculated_fontsize <- min(20, max(6, round(200 / nmax)))
+          calculated_fontsize_number <- max(5, round(calculated_fontsize * 0.9))
+        }
+      } else {
+        # user opted out of automatic scaling
+        calculated_fontsize <- 16
+        calculated_fontsize_number <- 14
+      }
 
   if (!is.null(filename)) {
     dev.off()
@@ -229,8 +268,18 @@ plot_pubmatrix_heatmap <- function(matrix,
 #' rownames(test_matrix) <- c("Gene1", "Gene2")
 #' colnames(test_matrix) <- c("GeneA", "GeneB")
 #'
-#' # Create simple heatmap
+#' # Create simple heatmap (wrapper)
 #' pubmatrix_heatmap(test_matrix, title = "Simple Test Heatmap")
+#'
+#' # Equivalent pheatmap call
+#' pheatmap::pheatmap(
+#'   test_matrix,
+#'   main = "Simple Test Heatmap (pheatmap)",
+#'   color = colorRampPalette(c("#fee5d9", "#cb181d"))(100),
+#'   display_numbers = TRUE,
+#'   fontsize = 16,
+#'   fontsize_number = 14
+#' )
 #' @export
 pubmatrix_heatmap <- function(matrix, title = "PubMatrix Results") {
   plot_pubmatrix_heatmap(matrix, title = title, cluster_rows = TRUE, cluster_cols = TRUE)
