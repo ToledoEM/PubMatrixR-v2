@@ -61,11 +61,11 @@ test_that("PubMatrix works with minimal example", {
   )
   
   # Basic assertions
-  expect_true(is.matrix(result))
+  expect_true(is.data.frame(result))
   expect_equal(nrow(result), length(B))
   expect_equal(ncol(result), length(A))
-  expect_true(is.numeric(result))
-  expect_true(all(result >= 0))  # Publication counts should be non-negative
+  expect_true(all(sapply(result, is.numeric)))
+  expect_true(all(unlist(result) >= 0))  # Publication counts should be non-negative
 })
 
 # Test 4: Function Parameter Validation
@@ -171,7 +171,7 @@ test_that("File input works correctly", {
   unlink(temp_file)
   
   # Assertions
-  expect_true(is.matrix(result))
+  expect_true(is.data.frame(result))
   expect_equal(nrow(result), 2)  # 2 terms after #
   expect_equal(ncol(result), 2)  # 2 terms before #
 })
@@ -243,9 +243,9 @@ test_that("API key parameter is handled correctly", {
         
       )
       
-      # Both should return matrices
-      expect_true(is.matrix(result_no_key))
-      expect_true(is.matrix(result_fake_key))
+      # Both should return data.frames
+      expect_true(is.data.frame(result_no_key))
+      expect_true(is.data.frame(result_fake_key))
       
       # Results should be similar (same search, different API usage)
       expect_equal(dim(result_no_key), dim(result_fake_key))
@@ -286,9 +286,9 @@ test_that("Different databases work correctly", {
     
   )
   
-  # Both should return valid matrices
-  expect_true(is.matrix(result_pubmed))
-  expect_true(is.matrix(result_pmc))
+  # Both should return valid data.frames
+  expect_true(is.data.frame(result_pubmed))
+  expect_true(is.data.frame(result_pmc))
   expect_equal(dim(result_pubmed), dim(result_pmc))
 })
 
@@ -318,7 +318,7 @@ test_that("Function handles larger search matrices", {
   execution_time <- as.numeric(difftime(end_time, start_time, units = "secs"))
   
   # Assertions
-  expect_true(is.matrix(result))
+  expect_true(is.data.frame(result))
   expect_equal(dim(result), c(length(B), length(A)))
   expect_true(execution_time < 120)  # Should complete within 2 minutes
 })

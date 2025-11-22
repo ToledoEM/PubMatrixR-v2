@@ -17,7 +17,7 @@ plot_pubmatrix_heatmap(
 )
 }
 \arguments{
-\item{matrix}{A numeric matrix from PubMatrix results containing publication co-occurrence counts}
+\item{matrix}{A data frame or matrix from PubMatrix results containing publication co-occurrence counts}
 
 \item{title}{Character string for the heatmap title. Default is "PubMatrix Co-occurrence Heatmap"}
 
@@ -49,14 +49,11 @@ and uses Euclidean distance for clustering rows and columns. Jaccard distance is
 and union is the total number of non-zero elements. NA values in the input matrix are converted to 0 before calculation to ensure stability.
 }
 \examples{
-\dontrun{
-# First run PubMatrix
-result <- PubMatrix(A = c("gene1", "gene2"), B = c("disease1", "disease2"))
+# Create a small test matrix
+test_matrix <- matrix(c(1, 2, 3, 4), nrow = 2, ncol = 2)
+rownames(test_matrix) <- c("Gene1", "Gene2")
+colnames(test_matrix) <- c("GeneA", "GeneB")
 
 # Create heatmap
-plot_pubmatrix_heatmap(result)
-
-# Save to file
-plot_pubmatrix_heatmap(result, filename = "my_heatmap.png")
-}
+plot_pubmatrix_heatmap(test_matrix, title = "Test Heatmap")
 }

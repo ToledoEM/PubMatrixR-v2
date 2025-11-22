@@ -19,7 +19,7 @@ test_that("Minimal reproducible example works", {
     
   )
   
-  expect_true(is.matrix(result))
+  expect_true(is.data.frame(result))
   expect_equal(dim(result), c(1, 1))
   expect_true(is.numeric(result[1,1]))
   expect_true(result[1,1] >= 0)
@@ -54,7 +54,7 @@ test_that("Common biomedical terms return results", {
     
   )
   
-  expect_true(is.matrix(result))
+  expect_true(is.data.frame(result))
   expect_true(result[1,1] > 0)  # Should definitely have publications
 })
 
@@ -77,7 +77,7 @@ test_that("File input minimal example works", {
   
   unlink(temp_file)
   
-  expect_true(is.matrix(result))
+  expect_true(is.data.frame(result))
   expect_equal(dim(result), c(1, 1))
 })
 
@@ -101,7 +101,7 @@ test_that("Single search completes quickly", {
   duration <- as.numeric(difftime(end_time, start_time, units = "secs"))
   
   expect_true(duration < 30)  # Should complete within 30 seconds
-  expect_true(is.matrix(result))
+  expect_true(is.data.frame(result))
 })
 
 # Test both databases work
@@ -129,7 +129,7 @@ test_that("Both PubMed and PMC databases are accessible", {
     
   )
   
-  expect_true(is.matrix(result_pubmed))
-  expect_true(is.matrix(result_pmc))
+  expect_true(is.data.frame(result_pubmed))
+  expect_true(is.data.frame(result_pmc))
   expect_equal(dim(result_pubmed), dim(result_pmc))
 })

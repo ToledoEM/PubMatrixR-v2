@@ -4,10 +4,17 @@ subtitle: "A comprehensive guide to analyzing publication relationships"
 output: rmarkdown::html_vignette
 author: "ToledoEM"
 date: "`r Sys.Date()`"
+vignette: >
+  %\VignetteIndexEntry{PubMatrixR with Ligand Receptors}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
 ---
 
 
-```{r}
+<img src="https://toledoem.github.io/img/LogoPubmatrix.png" align="right" width=150/>
+
+
+```{r setup}
 library(PubMatrixR)
 library(knitr)
 library(kableExtra)
@@ -37,7 +44,7 @@ result <- PubMatrix(A = A,
 ```
 
 
-```{r bar_plots, fig.width=14, fig.height=10, out.width="100%", dpi=150}
+```{r bar_plots, out.width="100%", dpi=150}
 # Create data frame for List A genes (rows) colored by List B genes (columns)
 a_genes_data <- data.frame(
   gene = rownames(result),
@@ -106,7 +113,7 @@ kable(result,
 
 
 
-```{r heatmap_clean_asymmetric2, fig.width=8, fig.height=8, out.width="100%", dpi=150}
+```{r heatmap_clean_asymmetric2, out.width="100%", dpi=150}
 plot_pubmatrix_heatmap(matrix = result, 
                        title = "WNT - Ligands v/s Receptors",
                        show_numbers = TRUE)
@@ -122,10 +129,3 @@ pubmatrix_heatmap(matrix = result)
 sessionInfo()
 ```
 
-```{r system_details}
-# Additional system details
-cat("Date generated:", format(Sys.time(), "%Y-%m-%d %H:%M:%S %Z"), "\n")
-cat("R version:", R.version.string, "\n")
-cat("Platform:", R.version$platform, "\n")
-cat("Operating System:", Sys.info()["sysname"], Sys.info()["release"], "\n")
-```

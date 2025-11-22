@@ -120,7 +120,7 @@ test_that("File format validation works", {
   temp_file2 <- tempfile(fileext = ".txt")
   writeLines(c("term1", "#", "term2", "#", "term3"), temp_file2)
   
-  expect_no_error({
+  expect_warning({
     result <- PubMatrix(
       file = temp_file2,
       Database = "pubmed",
@@ -128,8 +128,8 @@ test_that("File format validation works", {
       outfile = NULL,
       
     )
-    expect_true(is.matrix(result))
-  })
+    expect_true(is.data.frame(result))
+  }, "numerical expression has 2 elements: only the first used")
   
   # Test empty file
   temp_file3 <- tempfile(fileext = ".txt")
@@ -259,7 +259,7 @@ test_that("Search term preprocessing works correctly", {
       )
       
       # Should handle spaces by converting to +
-      expect_true(is.matrix(result))
+      expect_true(is.data.frame(result))
       
     }, error = function(e) {
       message("Space handling test: ", e$message)
@@ -281,7 +281,7 @@ test_that("Search term preprocessing works correctly", {
         
       )
       
-      expect_true(is.matrix(result))
+      expect_true(is.data.frame(result))
       
     }, error = function(e) {
       message("Special character test: ", e$message)

@@ -3,7 +3,7 @@
 #' This function creates a heatmap displaying Jaccard distance values calculated from
 #' a PubMatrix result matrix, with Euclidean distance clustering for rows and columns.
 #'
-#' @param matrix A numeric matrix from PubMatrix results containing publication co-occurrence counts
+#' @param matrix A data frame or matrix from PubMatrix results containing publication co-occurrence counts
 #' @param title Character string for the heatmap title. Default is "PubMatrix Co-occurrence Heatmap"
 #' @param cluster_rows Logical value determining if rows should be clustered using Euclidean distance. Default is TRUE
 #' @param cluster_cols Logical value determining if columns should be clustered using Euclidean distance. Default is TRUE
@@ -22,16 +22,13 @@
 #' @importFrom stats dist
 #' @export
 #' @examples
-#' \dontrun{
-#' # First run PubMatrix
-#' result <- PubMatrix(A = c("gene1", "gene2"), B = c("disease1", "disease2"))
+#' # Create a small test matrix
+#' test_matrix <- matrix(c(1, 2, 3, 4), nrow = 2, ncol = 2)
+#' rownames(test_matrix) <- c("Gene1", "Gene2")
+#' colnames(test_matrix) <- c("GeneA", "GeneB")
 #' 
 #' # Create heatmap
-#' plot_pubmatrix_heatmap(result)
-#' 
-#' # Save to file
-#' plot_pubmatrix_heatmap(result, filename = "my_heatmap.png")
-#' }
+#' plot_pubmatrix_heatmap(test_matrix, title = "Test Heatmap")
 plot_pubmatrix_heatmap <- function(matrix, 
                                    title = "PubMatrix Co-occurrence Heatmap",
                                    cluster_rows = TRUE,
@@ -218,6 +215,14 @@ plot_pubmatrix_heatmap <- function(matrix,
 #' @param matrix A numeric matrix from PubMatrix results
 #' @param title Character string for the heatmap title
 #' @return A pheatmap object (invisible)
+#' @examples
+#' # Create a small test matrix
+#' test_matrix <- matrix(c(1, 2, 3, 4), nrow = 2, ncol = 2)
+#' rownames(test_matrix) <- c("Gene1", "Gene2")
+#' colnames(test_matrix) <- c("GeneA", "GeneB")
+#' 
+#' # Create simple heatmap
+#' pubmatrix_heatmap(test_matrix, title = "Simple Test Heatmap")
 #' @export
 pubmatrix_heatmap <- function(matrix, title = "PubMatrix Results") {
   plot_pubmatrix_heatmap(matrix, title = title, cluster_rows = TRUE, cluster_cols = TRUE)
