@@ -43,9 +43,6 @@ docs/
 # translation temp files
 po/*~
 
-# RStudio Connect folder
-rsconnect/
-
 # macOS
 .DS_Store
 .DS_Store?
@@ -83,4 +80,4 @@ pubmatrix*
 # Local development files
 .env
 .local
-/Meta/
+Meta/
