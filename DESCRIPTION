@@ -1,8 +1,6 @@
 Package: PubMatrixR
 Version: 2.0
 Title: Search Entrez Using Boolean AND Queries
-Author: Tyler Laird [aut, cre], Toledo Enrique [ctb]
-Maintainer: Toledo Enrique <enriquetoledo@gmail.com>
 Authors@R: c(person("Tyler", "Laird", email = "tylerscottlaird@gmail.com",
     role = "aut"),
     person("Toledo", "Enrique", email = "enriquetoledo@gmail.com", role = c("ctb", "cre")))
