@@ -12,10 +12,10 @@
 #' @param filename Optional filename to save the heatmap. If NULL, displays the plot
 #' @param width Width of saved plot in inches. Default is 10
 #' @param height Height of saved plot in inches. Default is 8
-#' @details 
-#' The function displays Jaccard distance values in the heatmap cells (same as compute_jaccard_matrix) 
-#' and uses Euclidean distance for clustering rows and columns. Jaccard distance is calculated as 
-#' 1 - (intersection/union) where intersection is the number of common non-zero elements 
+#' @details
+#' The function displays Jaccard distance values in the heatmap cells (same as compute_jaccard_matrix)
+#' and uses Euclidean distance for clustering rows and columns. Jaccard distance is calculated as
+#' 1 - (intersection/union) where intersection is the number of common non-zero elements
 #' and union is the total number of non-zero elements. NA values in the input matrix are converted to 0 before calculation to ensure stability.
 #' @return A pheatmap object (invisible)
 #' @importFrom grDevices png dev.off colorRampPalette
@@ -26,42 +26,43 @@
 #' test_matrix <- matrix(c(1, 2, 3, 4), nrow = 2, ncol = 2)
 #' rownames(test_matrix) <- c("Gene1", "Gene2")
 #' colnames(test_matrix) <- c("GeneA", "GeneB")
-#' 
+#'
 #' # Create heatmap
 #' plot_pubmatrix_heatmap(test_matrix, title = "Test Heatmap")
-plot_pubmatrix_heatmap <- function(matrix, 
+plot_pubmatrix_heatmap <- function(matrix,
                                    title = "PubMatrix Co-occurrence Heatmap",
                                    cluster_rows = TRUE,
-                                   cluster_cols = TRUE, 
+                                   cluster_cols = TRUE,
                                    show_numbers = TRUE,
                                    color_palette = NULL,
                                    filename = NULL,
                                    width = 10,
                                    height = 8) {
-  
   # --- Input validation and coercion ---
   if (is.data.frame(matrix)) {
     # Convert data frame to matrix
     matrix <- as.matrix(matrix)
   }
-  
+
   if (!is.matrix(matrix)) {
     stop("Input must be a matrix (or a data frame coercible to a matrix).")
   }
-  
+
   if (!is.numeric(matrix)) {
     if (is.character(matrix)) {
       # Attempt to coerce the character matrix to numeric.
       # apply is used for column-wise coercion, preserving column names.
       matrix_coerced <- as.matrix(apply(matrix, 2, as.numeric))
-      
+
       # Check if coercion failed because of non-numeric strings (like formulas)
       if (all(is.na(matrix_coerced[!is.na(matrix)]))) {
         # The matrix likely contains non-numeric strings (like HTML/Excel formulas)
-        stop("Input matrix is character-based and contains non-numeric data (e.g., formulas/HTML links). \n",
-             "Ensure you are passing the raw numeric count matrix (the direct output of PubMatrix) and not the CSV export data.")
+        stop(
+          "Input matrix is character-based and contains non-numeric data (e.g., formulas/HTML links). \n",
+          "Ensure you are passing the raw numeric count matrix (the direct output of PubMatrix) and not the CSV export data."
+        )
       }
-      
+
       # Use the coerced matrix
       matrix <- matrix_coerced
       message("Warning: Input matrix was character and has been coerced to numeric. Check for NA values if unexpected.")
@@ -71,21 +72,21 @@ plot_pubmatrix_heatmap <- function(matrix,
     }
   }
   # --- End Input validation and coercion ---
-  
+
   if (nrow(matrix) == 0 || ncol(matrix) == 0) {
     stop("Matrix must have at least one row and one column")
   }
-  
+
   # --- NA Handling: Convert NA to 0 and report the change ---
   na_count <- sum(is.na(matrix))
   if (na_count > 0) {
     # Get the names of NA positions
     na_indices <- which(is.na(matrix), arr.ind = TRUE)
     na_positions <- paste0(rownames(matrix)[na_indices[, 1]], " vs ", colnames(matrix)[na_indices[, 2]])
-    
+
     # Replace NA with 0
     matrix[is.na(matrix)] <- 0
-    
+
     # Report back to the user which values were converted
     message_output <- paste0("NA values found in the input matrix (", na_count, " total) and converted to 0 for Jaccard calculation.\n")
     message_output <- paste0(message_output, "Converted positions (Row vs Col): \n- ", paste(head(na_positions, 10), collapse = "\n- "))
@@ -95,41 +96,41 @@ plot_pubmatrix_heatmap <- function(matrix,
     message(message_output)
   }
   # --- End NA Handling ---
-  
+
   # Define Jaccard distance function
   jaccard_dist <- function(x) {
     # Convert to binary (presence/absence)
     x_binary <- as.matrix(x > 0)
-    
+
     # Calculate Jaccard distance
     n <- nrow(x_binary)
     dist_matrix <- matrix(0, n, n)
-    
-    for (i in seq_len(n-1)) {
-      for (j in seq.int(i+1, n)) {
-        intersection <- sum(x_binary[i,] & x_binary[j,])
-        union <- sum(x_binary[i,] | x_binary[j,])
-        
+
+    for (i in seq_len(n - 1)) {
+      for (j in seq.int(i + 1, n)) {
+        intersection <- sum(x_binary[i, ] & x_binary[j, ])
+        union <- sum(x_binary[i, ] | x_binary[j, ])
+
         if (union == 0) {
-          jaccard_dist_val <- 1  # Maximum distance if no union
+          jaccard_dist_val <- 1 # Maximum distance if no union
         } else {
           jaccard_dist_val <- 1 - (intersection / union)
         }
-        
+
         dist_matrix[i, j] <- jaccard_dist_val
         dist_matrix[j, i] <- jaccard_dist_val
       }
     }
-    
+
     return(as.dist(dist_matrix))
   }
-  
+
   # Calculate overlap percentage matrix for display
   # This shows the percentage of overlap versus total overlaps using actual counts
   overlap_matrix <- matrix(0, nrow = nrow(matrix), ncol = ncol(matrix))
   rownames(overlap_matrix) <- rownames(matrix)
   colnames(overlap_matrix) <- colnames(matrix)
-  
+
   # Calculate overlap percentage for each cell using actual publication counts
   for (row_idx in seq_len(nrow(matrix))) {
     for (col_idx in seq_len(ncol(matrix))) {
@@ -142,50 +143,54 @@ plot_pubmatrix_heatmap <- function(matrix,
       overlap_matrix[row_idx, col_idx] <- if (union == 0) 0 else round((intersection / union) * 100, 1)
     }
   }
-  
+
   # Set default color palette if not provided
   if (is.null(color_palette)) {
     # Create a custom red gradient color palette for overlap percentages
     # Light colors for low overlap, dark colors for high overlap
-    custom_colors <- c("#fee5d9", "#fcbba1", "#fc9272", "#fb6a4a", 
-                       "#ef3b2c", "#cb181d", "#99000d")
+    custom_colors <- c(
+      "#fee5d9", "#fcbba1", "#fc9272", "#fb6a4a",
+      "#ef3b2c", "#cb181d", "#99000d"
+    )
     color_palette <- colorRampPalette(custom_colors)(100)
   }
-  
+
   # Prepare clustering distances (use Euclidean distance to avoid warnings)
   if (cluster_rows && nrow(matrix) > 1) {
     use_row_clustering <- TRUE
   } else {
     use_row_clustering <- FALSE
   }
-  
+
   if (cluster_cols && ncol(matrix) > 1) {
     use_col_clustering <- TRUE
   } else {
     use_col_clustering <- FALSE
   }
-  
+
   # Check for variation in the data - if all values are the same, throw an error
   overlap_range <- range(overlap_matrix, na.rm = TRUE)
   if (diff(overlap_range) == 0) {
-    stop("Cannot create heatmap: All overlap percentages are identical (", 
-         overlap_range[1], "%). No variation in data to visualize.")
+    stop(
+      "Cannot create heatmap: All overlap percentages are identical (",
+      overlap_range[1], "%). No variation in data to visualize."
+    )
   }
-  
+
   # Create the heatmap
   if (!is.null(filename)) {
     # Save to file
     png(filename = filename, width = width, height = height, units = "in", res = 300)
   }
-  
+
   heatmap_plot <- pheatmap::pheatmap(
-    overlap_matrix,  # Use overlap percentage matrix for display
+    overlap_matrix, # Use overlap percentage matrix for display
     main = title,
     color = color_palette,
     cluster_rows = use_row_clustering,
     cluster_cols = use_col_clustering,
-    clustering_distance_rows = "euclidean",  # Use Euclidean for clustering
-    clustering_distance_cols = "euclidean",  # Use Euclidean for clustering
+    clustering_distance_rows = "euclidean", # Use Euclidean for clustering
+    clustering_distance_cols = "euclidean", # Use Euclidean for clustering
     clustering_method = "average",
     display_numbers = show_numbers,
     number_color = "black",
@@ -199,12 +204,12 @@ plot_pubmatrix_heatmap <- function(matrix,
     angle_col = 45,
     legend = TRUE
   )
-  
+
   if (!is.null(filename)) {
     dev.off()
     message("Heatmap saved to: ", filename)
   }
-  
+
   return(invisible(heatmap_plot))
 }
 
@@ -220,7 +225,7 @@ plot_pubmatrix_heatmap <- function(matrix,
 #' test_matrix <- matrix(c(1, 2, 3, 4), nrow = 2, ncol = 2)
 #' rownames(test_matrix) <- c("Gene1", "Gene2")
 #' colnames(test_matrix) <- c("GeneA", "GeneB")
-#' 
+#'
 #' # Create simple heatmap
 #' pubmatrix_heatmap(test_matrix, title = "Simple Test Heatmap")
 #' @export
