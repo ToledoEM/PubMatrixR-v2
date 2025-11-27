@@ -23,6 +23,12 @@
 - **Flexible Input**: Use vectors directly or read terms from a file
 - **Progress Tracking**: Built-in progress bars for long searches
 
+## Try it Online
+
+**Interactive Shiny App**: [https://toledoem.shinyapps.io/pubmatrix-app/](https://toledoem.shinyapps.io/pubmatrix-app/)
+
+No installation required - just open the link and start analyzing!
+
 ## Installation
 
 You can install PubMatrixR from GitHub using:
