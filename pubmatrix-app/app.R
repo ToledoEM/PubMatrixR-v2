@@ -148,8 +148,8 @@ ui <- page_fillable(
     ),
     p(
       "Repository: ",
-      a("https://github.com/ToledoEM/PubMatrixR", 
-        href = "https://github.com/ToledoEM/PubMatrixR",
+      a("https://github.com/ToledoEM/PubMatrixR-v2", 
+        href = "https://github.com/ToledoEM/PubMatrixR-v2",
         target = "_blank")
     ),
     p("Get your free NCBI API key: ",

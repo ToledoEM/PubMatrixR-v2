@@ -5,6 +5,6 @@ account: toledoem
 server: shinyapps.io
 hostUrl: https://api.shinyapps.io/v1
 appId: 16184461
-bundleId: 11242119
+bundleId: 11242150
 url: https://toledoem.shinyapps.io/pubmatrix-app/
 version: 1
