@@ -78,7 +78,7 @@ src/*.dll
 *_result.csv
 *_heatmap.png
 test_out*
-pubmatrix*
+pubmatrix_result.csv
 
 # Local development files
 .env
