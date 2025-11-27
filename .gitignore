@@ -48,6 +48,9 @@ po/*~
 .DS_Store?
 ._*
 .Spotlight-V100
+
+# Shiny app folder
+app/
 .Trashes
 ehthumbs.db
 Thumbs.db
@@ -82,3 +85,4 @@ pubmatrix*
 .local
 Meta/
 TODO.md
+renv.lock

@@ -3,6 +3,7 @@
 <img src="https://toledoem.github.io/img/LogoPubmatrix.png" align="right" width=150/>
 
 
+- Repository: [https://github.com/ToledoEM/PubMatrixR-v2](https://github.com/ToledoEM/PubMatrixR-v2)
 - Forked from: [https://github.com/tslaird/PubMatrixR](https://github.com/tslaird/PubMatrixR)
 - Based on paper : [PubMatrix: a tool for multiplex literature mining](https://pmc.ncbi.nlm.nih.gov/articles/PMC317283/) of **Becker KG et al. BMC Bioinformatics. 2003 Dec 10;4:61. doi: 10.1186/1471-2105-4-61**
 
@@ -31,7 +32,7 @@ You can install PubMatrixR from GitHub using:
 if (!require(devtools)) install.packages("devtools")
 
 # Install PubMatrixR
-devtools::install_github("ToledoEM/PubMatrixR")
+devtools::install_github("ToledoEM/PubMatrixR-v2")
 ```
 
 ### Dependencies
