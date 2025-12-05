@@ -11,13 +11,15 @@
 #' @param API.key An API key obtained from Entrez; not necessary.
 #' @param Database Either 'pubmed' or 'pmc'. Determines the database to search.
 #' @param daterange A range of dates to search if desired. Should be a vector of two elements: the start and end date.
-#' @param outfile A file path to export the search dataframe as a .csv file. If NULL, no file will be exported.
+#' @param outfile A file path to export the search dataframe with hyperlinks. If NULL (default), no file will be exported. Ignored if export_format is not specified.
+#' @param export_format Format for exporting the hyperlinked dataframe with clickable links. Options are: NULL (default, no export), 'csv', or 'ods'. When NULL, only returns the dataframe to R without saving. 'csv' exports as Excel-compatible format with HYPERLINK formulas; 'ods' exports as OpenDocument Spreadsheet format compatible with LibreOffice/OpenOffice. Requires outfile parameter when not NULL.
 #' @return A dataframe of search results. Each element of the dataframe is the number of search results for a pair of search terms from A and B.
 #' @importFrom stringr str_extract_all
 #' @importFrom grDevices dev.off png
 #' @importFrom utils write.csv
 #' @importFrom pbapply pblapply
 #' @importFrom xml2 read_html
+#' @importFrom readODS write_ods
 #' @examples
 #' # Note: This example requires internet connection
 #' A <- c("WNT1", "WNT2")
@@ -27,7 +29,7 @@
 #' message("Example commented out to avoid internet dependency in checks")
 #' @export
 PubMatrix <- function(file = NULL, A = NULL, B = NULL, API.key = NULL,
-                      Database = "pubmed", daterange = NULL, outfile = NULL) {
+                      Database = "pubmed", daterange = NULL, outfile = NULL, export_format = NULL) {
   # Input validation
   if (is.null(A) & is.null(B)) {
     if (missing(file) || is.null(file)) {
@@ -117,9 +119,16 @@ PubMatrix <- function(file = NULL, A = NULL, B = NULL, API.key = NULL,
 
 
   ### export
-  if (!is.null(outfile)) {
-    if (grepl(".csv", outfile)) {
-      outfile <- sub(".csv", "", outfile)
+  if (!is.null(outfile) && !is.null(export_format)) {
+    # Remove file extension if provided
+    if (grepl("\\.csv$|\\.ods$", outfile)) {
+      outfile <- sub("\\.csv$|\\.ods$", "", outfile)
+    }
+
+    # Validate export format
+    export_format <- tolower(export_format)
+    if (!export_format %in% c("csv", "ods")) {
+      stop("export_format must be either 'csv' or 'ods'")
     }
 
     result_url_xlsx <- paste0("https://www.ncbi.nlm.nih.gov/", Database, "/?term=")
@@ -161,7 +170,14 @@ PubMatrix <- function(file = NULL, A = NULL, B = NULL, API.key = NULL,
     colnames(df_hyperlink) <- colnames(result_dataframe)
     rownames(df_hyperlink) <- rownames(result_dataframe)
 
-    write.csv(df_hyperlink, file = paste0(outfile, "_result.csv"), row.names = TRUE)
+    # Export based on specified format
+    if (export_format == "csv") {
+      write.csv(df_hyperlink, file = paste0(outfile, "_result.csv"), row.names = TRUE)
+    } else if (export_format == "ods") {
+      # For ODS format, we need to include rownames as a column
+      df_with_rownames <- data.frame(rowname = rownames(df_hyperlink), df_hyperlink, check.names = FALSE)
+      readODS::write_ods(df_with_rownames, path = paste0(outfile, "_result.ods"))
+    }
   }
 
   return(result_dataframe)

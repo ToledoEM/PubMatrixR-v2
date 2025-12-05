@@ -16,6 +16,7 @@ test_that("Minimal reproducible example works", {
     Database = "pubmed",
     daterange = c(2023, 2024),
     outfile = NULL,
+    export_format = NULL
   )
 
   expect_true(is.data.frame(result))
@@ -50,6 +51,7 @@ test_that("Common biomedical terms return results", {
     Database = "pubmed",
     daterange = c(2020, 2024),
     outfile = NULL,
+    export_format = NULL
   )
 
   expect_true(is.data.frame(result))
@@ -70,6 +72,7 @@ test_that("File input minimal example works", {
     Database = "pubmed",
     daterange = c(2023, 2024),
     outfile = NULL,
+    export_format = NULL
   )
 
   unlink(temp_file)
@@ -91,6 +94,7 @@ test_that("Single search completes quickly", {
     Database = "pubmed",
     daterange = c(2024, 2024),
     outfile = NULL,
+    export_format = NULL
   )
 
   end_time <- Sys.time()

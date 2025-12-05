@@ -86,3 +86,5 @@ pubmatrix_result.csv
 Meta/
 TODO.md
 renv.lock
+/doc/
+/Meta/

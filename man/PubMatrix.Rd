@@ -11,7 +11,8 @@ PubMatrix(
   API.key = NULL,
   Database = "pubmed",
   daterange = NULL,
-  outfile = NULL
+  outfile = NULL,
+  export_format = NULL
 )
 }
 \arguments{
@@ -27,7 +28,9 @@ PubMatrix(
 
 \item{daterange}{A range of dates to search if desired. Should be a vector of two elements: the start and end date.}
 
-\item{outfile}{A file path to export the search dataframe as a .csv file. If NULL, no file will be exported.}
+\item{outfile}{A file path to export the search dataframe with hyperlinks. If NULL (default), no file will be exported. Ignored if export_format is not specified.}
+
+\item{export_format}{Format for exporting the hyperlinked dataframe with clickable links. Options are: NULL (default, no export), 'csv', or 'ods'. When NULL, only returns the dataframe to R without saving. 'csv' exports as Excel-compatible format with HYPERLINK formulas; 'ods' exports as OpenDocument Spreadsheet format compatible with LibreOffice/OpenOffice. Requires outfile parameter when not NULL.}
 }
 \value{
 A dataframe of search results. Each element of the dataframe is the number of search results for a pair of search terms from A and B.

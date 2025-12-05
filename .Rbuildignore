@@ -3,4 +3,7 @@
 ^.*\.Rproj$
 ^\.Rproj\.user$
 ^doc$
+^docs$
 ^Meta$
+^pubmatrix-app$
+^_pkgdown\.yml$

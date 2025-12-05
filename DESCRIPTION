@@ -15,7 +15,8 @@ Imports:
     pbapply,
     stringr,
     pheatmap,
-    xml2    
+    xml2,
+    readODS    
 RoxygenNote: 7.3.3
 Suggests: 
     knitr,

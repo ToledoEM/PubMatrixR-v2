@@ -115,6 +115,7 @@ test_that("File format validation works", {
         Database = "pubmed",
         daterange = c(2023, 2024),
         outfile = NULL,
+        export_format = NULL
       )
     },
     "File must contain '#' separator"
@@ -124,18 +125,16 @@ test_that("File format validation works", {
   temp_file2 <- tempfile(fileext = ".txt")
   writeLines(c("term1", "#", "term2", "#", "term3"), temp_file2)
 
-  expect_warning(
-    {
-      result <- PubMatrix(
-        file = temp_file2,
-        Database = "pubmed",
-        daterange = c(2023, 2024),
-        outfile = NULL,
-      )
-      expect_true(is.data.frame(result))
-    },
-    "numerical expression has 2 elements: only the first used"
-  )
+  expect_no_error({
+    result <- PubMatrix(
+      file = temp_file2,
+      Database = "pubmed",
+      daterange = c(2023, 2024),
+      outfile = NULL,
+      export_format = NULL
+    )
+    expect_true(is.data.frame(result))
+  })
 
   # Test empty file
   temp_file3 <- tempfile(fileext = ".txt")
@@ -148,6 +147,7 @@ test_that("File format validation works", {
         Database = "pubmed",
         daterange = c(2023, 2024),
         outfile = NULL,
+        export_format = NULL
       )
     },
     "File must contain '#' separator"
@@ -163,7 +163,7 @@ test_that("Output file handling works correctly", {
   A <- c("test")
   B <- c("term")
 
-  # Test with file extension in outfile name
+  # Test with file extension in outfile name and export_format = NULL (no export)
   temp_outfile1 <- tempfile(fileext = ".csv")
 
   expect_no_error({
@@ -174,13 +174,12 @@ test_that("Output file handling works correctly", {
           Database = "pubmed",
           daterange = c(2023, 2024),
           outfile = temp_outfile1,
+          export_format = NULL  # No file export
         )
 
-        # Should create file without double extension
+        # Should NOT create file when export_format is NULL
         expected_file <- sub("\\.csv$", "_result.csv", temp_outfile1)
-        if (file.exists(expected_file)) {
-          unlink(expected_file)
-        }
+        expect_false(file.exists(expected_file))
       },
       error = function(e) {
         message("Output file test error: ", e$message)
@@ -188,7 +187,7 @@ test_that("Output file handling works correctly", {
     )
   })
 
-  # Test with special characters in filename
+  # Test with special characters in filename and CSV export
   temp_outfile2 <- file.path(tempdir(), "test file with spaces")
 
   expect_no_error({
@@ -316,6 +315,7 @@ test_that("Function handles edge case matrix sizes", {
     outfile = NULL,
   )
 
+
   expect_equal(dim(result_1x1), c(1, 1))
   expect_true(is.numeric(result_1x1[1, 1]))
 
@@ -329,7 +329,65 @@ test_that("Function handles edge case matrix sizes", {
     Database = "pubmed",
     daterange = c(2023, 2024),
     outfile = NULL,
+    export_format = NULL
   )
 
   expect_equal(dim(result_asym), c(1, 5))
 })
+
+# Test export format parameter validation and behavior
+test_that("Export format parameter works correctly", {
+  skip_on_cran()
+
+  A <- c("test")
+  B <- c("term")
+
+  # Test: export_format = NULL should NOT create files
+  temp_outfile_null <- tempfile()
+  result_null <- PubMatrix(
+    A = A, B = B,
+    Database = "pubmed",
+    daterange = c(2023, 2024),
+    outfile = temp_outfile_null,
+    export_format = NULL
+  )
+
+  csv_file_null <- paste0(temp_outfile_null, "_result.csv")
+  ods_file_null <- paste0(temp_outfile_null, "_result.ods")
+  expect_false(file.exists(csv_file_null))
+  expect_false(file.exists(ods_file_null))
+  expect_true(is.data.frame(result_null))
+
+  # Test: export_format case-insensitive (CSV, Csv, cSv should work)
+  for (format_variant in c("csv", "CSV", "Csv")) {
+    temp_outfile_case <- tempfile()
+    result_case <- PubMatrix(
+      A = A, B = B,
+      Database = "pubmed",
+      daterange = c(2023, 2024),
+      outfile = temp_outfile_case,
+      export_format = format_variant
+    )
+
+    csv_file_case <- paste0(temp_outfile_case, "_result.csv")
+    expect_true(file.exists(csv_file_case))
+    unlink(csv_file_case)
+  }
+
+  # Test: outfile and export_format both NULL should not create files
+  temp_outfile_both_null <- tempfile()
+  result_both_null <- PubMatrix(
+    A = A, B = B,
+    Database = "pubmed",
+    daterange = c(2023, 2024),
+    outfile = temp_outfile_both_null,
+    export_format = NULL
+  )
+
+  csv_file_both_null <- paste0(temp_outfile_both_null, "_result.csv")
+  ods_file_both_null <- paste0(temp_outfile_both_null, "_result.ods")
+  expect_false(file.exists(csv_file_both_null))
+  expect_false(file.exists(ods_file_both_null))
+  expect_true(is.data.frame(result_both_null))
+})
+

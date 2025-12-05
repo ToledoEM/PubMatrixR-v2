@@ -1,9 +1,7 @@
-## ----include = FALSE----------------------------------------------------------
+## ----setup-options, include = FALSE-------------------------------------------
 knitr::opts_chunk$set(
   collapse = TRUE,
   comment = "#>",
-  fig.width = 14,
-  fig.height = 12,
   fig.align = "center",
   warning = FALSE,
   message = FALSE,
@@ -15,10 +13,18 @@ knitr::opts_chunk$set(
 library(PubMatrixR)
 library(knitr)
 library(kableExtra)
-# library(msigdf)
 library(dplyr)
+library(msigdf)
 library(pheatmap)
 library(ggplot2)
+
+## ----eval=FALSE---------------------------------------------------------------
+# result <- PubMatrix(
+#   A = gene_set_1,
+#   B = gene_set_2,
+#   API.key = "your_api_key_here",
+#   Database = "pubmed"
+# )
 
 ## ----gene_extraction, eval = FALSE--------------------------------------------
 # # Extract WNT-related genes
@@ -26,13 +32,13 @@ library(ggplot2)
 #   dplyr::filter(grepl(geneset, pattern = "wnt", ignore.case = TRUE)) %>%
 #   dplyr::pull(symbol) %>%
 #   unique()
-#
+# 
 # # Extract obesity-related genes
 # B <- msigdf::msigdf.human %>%
 #   dplyr::filter(grepl(geneset, pattern = "obesity", ignore.case = TRUE)) %>%
 #   dplyr::pull(symbol) %>%
 #   unique()
-#
+# 
 # # Sample genes for demonstration (making them equal in length)
 # A <- sample(A, 10, replace = FALSE)
 # B <- sample(B, 10, replace = FALSE)
@@ -43,7 +49,6 @@ A <- c("WNT1", "WNT2", "WNT3A", "WNT5A", "WNT7B", "CTNNB1", "DVL1")
 
 # Obesity-related genes
 B <- c("LEPR", "ADIPOQ", "PPARG", "TNF", "IL6", "ADRB2", "INSR")
-
 
 ## ----pubmatrix_analysis-------------------------------------------------------
 # Run actual PubMatrix analysis
@@ -67,9 +72,9 @@ kable(result,
     full_width = FALSE,
     position = "center"
   ) %>%
-  kableExtra::add_header_above(c(" " = 1, "Obesity Genes" = length(A)))
+  kableExtra::add_header_above(c(" " = 1, "Obesity Genes" = length(B)))
 
-## ----bar_plots, fig.width=14, fig.height=10, out.width="100%", dpi=150--------
+## ----bar_plots, out.width="100%", dpi=150-------------------------------------
 # Create data frame for List A genes (rows) colored by List B genes (columns)
 a_genes_data <- data.frame(
   gene = rownames(result),
@@ -127,20 +132,20 @@ p2 <- ggplot(b_genes_data, aes(x = reorder(gene, total_pubs), y = total_pubs, fi
 print(p1)
 print(p2)
 
-## ----heatmap_with_numbers_asymmetric, fig.width=16, fig.height=14, out.width="100%", dpi=150, fig.cap="Overlap percentage heatmap with values displayed in each cell"----
+## ----heatmap_with_numbers_asymmetric, fig.width=8, fig.height=6, out.width="100%", dpi=150, fig.cap="Overlap percentage heatmap with values displayed in each cell"----
 plot_pubmatrix_heatmap(result,
   title = "WNT-Obesity Gene Overlap Percentages",
   show_numbers = TRUE,
-  width = 16,
-  height = 14
+  width = 12,
+  height = 10
 )
 
-## ----heatmap_clean_asymmetric, fig.width=16, fig.height=14, out.width="100%", dpi=150, fig.cap="Co-occurrence heatmap without numbers for better visual clarity"----
+## ----heatmap_clean_asymmetric, fig.width=8, fig.height=6, out.width="100%", dpi=150, fig.cap="Co-occurrence heatmap without numbers for better visual clarity"----
 plot_pubmatrix_heatmap(result,
   title = "WNT-Obesity Gene Co-occurrence (Clean)",
   show_numbers = FALSE,
-  width = 16,
-  height = 14
+  width = 12,
+  height = 10
 )
 
 ## ----asymmetric_example-------------------------------------------------------
@@ -171,9 +176,9 @@ kable(result,
     full_width = FALSE,
     position = "center"
   ) %>%
-  kableExtra::add_header_above(c(" " = 1, "Genes" = length(A)))
+  kableExtra::add_header_above(c(" " = 1, "A Genes" = length(A)))
 
-## ----bar_plots_asymmetric, fig.width=14, fig.height=10, out.width="100%", dpi=150----
+## ----bar_plots_asymmetric, out.width="100%", dpi=150--------------------------
 # Create data frame for List A genes (rows) colored by List B genes (columns)
 a_genes_data2 <- data.frame(
   gene = rownames(result),
@@ -231,29 +236,22 @@ p4 <- ggplot(b_genes_data2, aes(x = reorder(gene, total_pubs), y = total_pubs, f
 print(p3)
 print(p4)
 
-## ----heatmap_with_numbers_asymmetric2, fig.width=16, fig.height=14, out.width="100%", dpi=150, fig.cap="Overlap percentage heatmap with values displayed in each cell"----
+## ----heatmap_with_numbers_asymmetric2, fig.width=8, fig.height=6, out.width="100%", dpi=150, fig.cap="Overlap percentage heatmap with values displayed in each cell"----
 plot_pubmatrix_heatmap(result,
   title = "Asymmetric Gene Lists Overlap Percentages",
   show_numbers = TRUE,
-  width = 16,
-  height = 14
+  width = 12,
+  height = 10
 )
 
-## ----heatmap_clean_asymmetric2, fig.width=16, fig.height=14, out.width="100%", dpi=150, fig.cap="Co-occurrence heatmap without numbers for better visual clarity"----
+## ----heatmap_clean_asymmetric2, fig.width=8, fig.height=6, out.width="100%", dpi=150, fig.cap="Co-occurrence heatmap without numbers for better visual clarity"----
 plot_pubmatrix_heatmap(result,
   title = "Asymmetric Gene Lists Co-occurrence (Clean)",
   show_numbers = FALSE,
-  width = 16,
-  height = 14
+  width = 12,
+  height = 10
 )
 
 ## ----system_info--------------------------------------------------------------
 sessionInfo()
 
-## ----system_details-----------------------------------------------------------
-# Additional system details
-cat("Date generated:", format(Sys.time(), "%Y-%m-%d %H:%M:%S %Z"), "\n")
-cat("R version:", R.version.string, "\n")
-cat("Platform:", R.version$platform, "\n")
-cat("Operating System:", Sys.info()["sysname"], Sys.info()["release"], "\n")
-cat("User:", Sys.info()["user"], "\n")

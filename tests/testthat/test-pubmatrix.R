@@ -178,8 +178,8 @@ test_that("File input works correctly", {
   expect_equal(ncol(result), 2) # 2 terms before #
 })
 
-# Test 8: CSV Output Functionality
-test_that("CSV output is created correctly", {
+# Test 8: Export Format NULL (default - no file export)
+test_that("export_format = NULL returns data only without file", {
   skip_on_cran()
   skip_if_not(check_internet(), "No internet connection available")
   skip_if_not(check_ncbi_api(), "NCBI API not accessible")
@@ -194,11 +194,43 @@ test_that("CSV output is created correctly", {
     Database = "pubmed",
     daterange = c(2020, 2024),
     outfile = temp_outfile,
+    export_format = NULL  # Default - no file export
+  )
+
+  # Check that data is returned
+  expect_true(is.data.frame(result))
+  expect_equal(nrow(result), 1)
+  expect_equal(ncol(result), 1)
+
+  # Check that NO output file was created
+  csv_file <- paste0(temp_outfile, "_result.csv")
+  ods_file <- paste0(temp_outfile, "_result.ods")
+  expect_false(file.exists(csv_file))
+  expect_false(file.exists(ods_file))
+})
+
+# Test 9: CSV Output Functionality
+test_that("CSV output is created with export_format = 'csv'", {
+  skip_on_cran()
+  skip_if_not(check_internet(), "No internet connection available")
+  skip_if_not(check_ncbi_api(), "NCBI API not accessible")
+
+  A <- c("aspirin")
+  B <- c("cardiology")
+  temp_outfile <- tempfile()
+
+  result <- PubMatrix(
+    A = A,
+    B = B,
+    Database = "pubmed",
+    daterange = c(2020, 2024),
+    outfile = temp_outfile,
+    export_format = "csv"
   )
 
   # Check if output file was created
   csv_file <- paste0(temp_outfile, "_result.csv")
-  expect_true(file.exists(csv_file))
+  expect_true(file.exists(csv_file), info = paste("Expected CSV file:", csv_file))
 
   # Check CSV content
   if (file.exists(csv_file)) {
@@ -206,12 +238,81 @@ test_that("CSV output is created correctly", {
     expect_true(nrow(csv_data) >= 1)
     expect_true(ncol(csv_data) >= 2) # At least row names + 1 data column
 
+    # Check for HYPERLINK formulas
+    first_cell <- as.character(csv_data[1, 2])
+    expect_true(grepl("HYPERLINK", first_cell))
+
     # Clean up
     unlink(csv_file)
   }
 })
 
-# Test 9: API Key Parameter
+# Test 10: ODS Output Functionality
+test_that("ODS output is created with export_format = 'ods'", {
+  skip_on_cran()
+  skip_if_not(check_internet(), "No internet connection available")
+  skip_if_not(check_ncbi_api(), "NCBI API not accessible")
+
+  # Skip if readODS is not available
+  skip_if_not_installed("readODS")
+
+  A <- c("ibuprofen")
+  B <- c("inflammation")
+  temp_outfile <- tempfile()
+
+  result <- PubMatrix(
+    A = A,
+    B = B,
+    Database = "pubmed",
+    daterange = c(2020, 2024),
+    outfile = temp_outfile,
+    export_format = "ods"
+  )
+
+  # Check if output file was created
+  ods_file <- paste0(temp_outfile, "_result.ods")
+  expect_true(file.exists(ods_file))
+
+  # Check ODS content by reading it back
+  if (file.exists(ods_file)) {
+    ods_data <- readODS::read_ods(ods_file)
+    expect_true(nrow(ods_data) >= 1)
+    expect_true(ncol(ods_data) >= 2)
+
+    # Clean up
+    unlink(ods_file)
+  }
+})
+
+# Test 11: Export format validation
+test_that("Invalid export_format values are rejected", {
+  A <- c("test")
+  B <- c("term")
+
+  expect_error(
+    PubMatrix(
+      A = A,
+      B = B,
+      Database = "pubmed",
+      outfile = "test_output",
+      export_format = "xlsx"  # Invalid format
+    ),
+    "export_format must be either 'csv' or 'ods'"
+  )
+
+  expect_error(
+    PubMatrix(
+      A = A,
+      B = B,
+      Database = "pubmed",
+      outfile = "test_output",
+      export_format = "JSON"  # Invalid format
+    ),
+    "export_format must be either 'csv' or 'ods'"
+  )
+})
+
+# Test 12: API Key Parameter
 test_that("API key parameter is handled correctly", {
   skip_on_cran()
   skip_if_not(check_internet(), "No internet connection available")
@@ -258,7 +359,7 @@ test_that("API key parameter is handled correctly", {
   })
 })
 
-# Test 10: Multiple Database Support
+# Test 13: Multiple Database Support
 test_that("Different databases work correctly", {
   skip_on_cran()
   skip_if_not(check_internet(), "No internet connection available")
@@ -291,7 +392,7 @@ test_that("Different databases work correctly", {
   expect_equal(dim(result_pubmed), dim(result_pmc))
 })
 
-# Test 11: Large Search Matrix Performance
+# Test 14: Large Search Matrix Performance
 test_that("Function handles larger search matrices", {
   skip_on_cran()
   skip_if_not(check_internet(), "No internet connection available")

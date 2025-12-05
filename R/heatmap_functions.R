@@ -14,6 +14,7 @@
 #' @param height Height of saved plot in inches. Default is 8
 #' @param cellwidth Optional numeric cell width for pheatmap (in pixels). Default `NA` lets pheatmap auto-size.
 #' @param cellheight Optional numeric cell height for pheatmap (in pixels). Default `NA` lets pheatmap auto-size.
+#' @param scale_font Logical value determining if font size should scale with cell size. Default is TRUE
 #' @details
 #' The function displays Jaccard distance values in the heatmap cells (same as compute_jaccard_matrix)
 #' and uses Euclidean distance for clustering rows and columns. Jaccard distance is calculated as
@@ -21,7 +22,8 @@
 #' and union is the total number of non-zero elements. NA values in the input matrix are converted to 0 before calculation to ensure stability.
 #' @return A pheatmap object (invisible)
 #' @importFrom grDevices png dev.off colorRampPalette
-#' @importFrom stats dist
+#' @importFrom stats dist as.dist
+#' @importFrom utils head
 #' @export
 #' @examples
 #' # Create a small test matrix

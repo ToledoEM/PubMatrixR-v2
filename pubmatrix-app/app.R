@@ -22,7 +22,7 @@ ui <- page_fillable(
       # API Key Input (Required)
       textInput(
         "api_key",
-        label = "NCBI API Key (Required)",
+        label = "NCBI API Key (Required for Shinny version)",
         placeholder = "Enter your NCBI API key here"
       ),
       
@@ -138,7 +138,7 @@ ui <- page_fillable(
   # Footer with citation and repo link
   hr(),
   div(
-    style = "padding: 20px; text-align: center; color: #666; font-size: 0.9em;",
+    style = "padding: 10px; text-align: center; color: #666; font-size: 0.9em;",
     p(
       "Based on: ",
       a("PubMatrix: a tool for multiplex literature mining", 

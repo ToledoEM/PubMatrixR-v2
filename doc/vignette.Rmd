@@ -10,12 +10,10 @@ vignette: >
   %\VignetteEncoding{UTF-8}
 ---
 
-```{r, include = FALSE}
+```{r setup-options, include = FALSE}
 knitr::opts_chunk$set(
   collapse = TRUE,
   comment = "#>",
-  fig.width = 14,
-  fig.height = 12,
   fig.align = "center",
   warning = FALSE,
   message = FALSE,
@@ -23,13 +21,14 @@ knitr::opts_chunk$set(
   dpi = 150
 )
 ```
+<img src="https://toledoem.github.io/img/LogoPubmatrix.png" align="right" width=150/>
 
 ```{r setup, message=FALSE}
 library(PubMatrixR)
 library(knitr)
 library(kableExtra)
-# library(msigdf)
 library(dplyr)
+library(msigdf)
 library(pheatmap)
 library(ggplot2)
 ```
@@ -46,7 +45,7 @@ PubMatrixR is an R package designed to analyze literature co-occurrence patterns
 
 ### Acknowledgments
 
-This package is a fork of the original [PubMatrixR](https://github.com/tslaird/PubMatrixR) by tslaird. 
+This package is a fork of the original [PubMatrixR](https://github.com/tslaird/PubMatrixR) by tslaird. Our gratitude to the original author.
 
 ### NCBI API Key (Recommended)
 
@@ -59,11 +58,13 @@ To obtain your free NCBI API key, visit: <https://support.nlm.nih.gov/kbArticle/
 
 Once you have your API key, you can use it in PubMatrixR like this:
 
-```r
-result <- PubMatrix(A = gene_set_1,
-                   B = gene_set_2,
-                   API.key = "your_api_key_here",
-                   Database = "pubmed")
+```{r, eval=FALSE}
+result <- PubMatrix(
+  A = gene_set_1,
+  B = gene_set_2,
+  API.key = "your_api_key_here",
+  Database = "pubmed"
+)
 ```
 
 ## Preparing Gene Sets
@@ -135,7 +136,7 @@ kable(result,
     full_width = FALSE,
     position = "center"
   ) %>%
-  kableExtra::add_header_above(c(" " = 1, "Obesity Genes" = length(A)))
+  kableExtra::add_header_above(c(" " = 1, "Obesity Genes" = length(B)))
 ```
 
 ## Visualization
@@ -144,7 +145,7 @@ kable(result,
 
 Let's first examine which genes have the highest publication counts:
 
-```{r bar_plots, fig.width=14, fig.height=10, out.width="100%", dpi=150}
+```{r bar_plots, out.width="100%", dpi=150}
 # Create data frame for List A genes (rows) colored by List B genes (columns)
 a_genes_data <- data.frame(
   gene = rownames(result),
@@ -207,12 +208,12 @@ print(p2)
 
 The heatmap displays overlap percentages calculated from the publication co-occurrence counts:
 
-```{r heatmap_with_numbers_asymmetric, fig.width=16, fig.height=14, out.width="100%", dpi=150, fig.cap="Overlap percentage heatmap with values displayed in each cell"}
+```{r heatmap_with_numbers_asymmetric, fig.width=8, fig.height=6, out.width="100%", dpi=150, fig.cap="Overlap percentage heatmap with values displayed in each cell"}
 plot_pubmatrix_heatmap(result,
   title = "WNT-Obesity Gene Overlap Percentages",
   show_numbers = TRUE,
-  width = 16,
-  height = 14
+  width = 12,
+  height = 10
 )
 ```
 
@@ -220,12 +221,12 @@ plot_pubmatrix_heatmap(result,
 
 For a cleaner visualization without numbers, useful for presentations:
 
-```{r heatmap_clean_asymmetric, fig.width=16, fig.height=14, out.width="100%", dpi=150, fig.cap="Co-occurrence heatmap without numbers for better visual clarity"}
+```{r heatmap_clean_asymmetric, fig.width=8, fig.height=6, out.width="100%", dpi=150, fig.cap="Co-occurrence heatmap without numbers for better visual clarity"}
 plot_pubmatrix_heatmap(result,
   title = "WNT-Obesity Gene Co-occurrence (Clean)",
   show_numbers = FALSE,
-  width = 16,
-  height = 14
+  width = 12,
+  height = 10
 )
 ```
 
@@ -264,12 +265,12 @@ kable(result,
     full_width = FALSE,
     position = "center"
   ) %>%
-  kableExtra::add_header_above(c(" " = 1, "Genes" = length(A)))
+  kableExtra::add_header_above(c(" " = 1, "A Genes" = length(A)))
 ```
 
 ### Bar Plots for Asymmetric Lists
 
-```{r bar_plots_asymmetric, fig.width=14, fig.height=10, out.width="100%", dpi=150}
+```{r bar_plots_asymmetric, out.width="100%", dpi=150}
 # Create data frame for List A genes (rows) colored by List B genes (columns)
 a_genes_data2 <- data.frame(
   gene = rownames(result),
@@ -332,12 +333,12 @@ print(p4)
 
 The heatmap displays overlap percentages calculated from the publication co-occurrence counts:
 
-```{r heatmap_with_numbers_asymmetric2, fig.width=16, fig.height=14, out.width="100%", dpi=150, fig.cap="Overlap percentage heatmap with values displayed in each cell"}
+```{r heatmap_with_numbers_asymmetric2, fig.width=8, fig.height=6, out.width="100%", dpi=150, fig.cap="Overlap percentage heatmap with values displayed in each cell"}
 plot_pubmatrix_heatmap(result,
   title = "Asymmetric Gene Lists Overlap Percentages",
   show_numbers = TRUE,
-  width = 16,
-  height = 14
+  width = 12,
+  height = 10
 )
 ```
 
@@ -345,12 +346,12 @@ plot_pubmatrix_heatmap(result,
 
 For a cleaner visualization without numbers, useful for presentations:
 
-```{r heatmap_clean_asymmetric2, fig.width=16, fig.height=14, out.width="100%", dpi=150, fig.cap="Co-occurrence heatmap without numbers for better visual clarity"}
+```{r heatmap_clean_asymmetric2, fig.width=8, fig.height=6, out.width="100%", dpi=150, fig.cap="Co-occurrence heatmap without numbers for better visual clarity"}
 plot_pubmatrix_heatmap(result,
   title = "Asymmetric Gene Lists Co-occurrence (Clean)",
   show_numbers = FALSE,
-  width = 16,
-  height = 14
+  width = 12,
+  height = 10
 )
 ```
 
@@ -376,14 +377,3 @@ The resulting matrices and visualizations can help identify:
 ```{r system_info}
 sessionInfo()
 ```
-
-```{r system_details}
-# Additional system details
-cat("Date generated:", format(Sys.time(), "%Y-%m-%d %H:%M:%S %Z"), "\n")
-cat("R version:", R.version.string, "\n")
-cat("Platform:", R.version$platform, "\n")
-cat("Operating System:", Sys.info()["sysname"], Sys.info()["release"], "\n")
-cat("User:", Sys.info()["user"], "\n")
-```
-
-

@@ -4,7 +4,7 @@
 
 
 - Repository: [https://github.com/ToledoEM/PubMatrixR-v2](https://github.com/ToledoEM/PubMatrixR-v2)
-- Forked from: [https://github.com/tslaird/PubMatrixR](https://github.com/tslaird/PubMatrixR)
+- Original code from: [https://github.com/tslaird/PubMatrixR](https://github.com/tslaird/PubMatrixR)
 - Based on paper : [PubMatrix: a tool for multiplex literature mining](https://pmc.ncbi.nlm.nih.gov/articles/PMC317283/) of **Becker KG et al. BMC Bioinformatics. 2003 Dec 10;4:61. doi: 10.1186/1471-2105-4-61**
 
 
@@ -12,6 +12,8 @@
 ## Overview
 
 **PubMatrixR** is an R package that performs systematic literature searches on PubMed and PMC databases using pairwise combinations of search terms. It creates co-occurrence matrices showing the number of publications that mention both terms from two different sets, enabling researchers to explore relationships between genes, diseases, pathways, or any other biomedical concepts.
+
+Original deprecated version from @tslaird. Current release v2 is updated to use tidyverse and incorporate graphical output of the analysis. 
 
 ### Key Features
 
@@ -49,6 +51,7 @@ PubMatrixR requires the following R packages:
 - `stringr` - String manipulation
 - `pheatmap` - Static heatmap generation
 - `xml2` - XML parsing for API responses
+- `readODS` - To export results in OpenDocument Spreadsheet - Excel compatible - for hyperlink export.
 
 ## Quick Start
 
@@ -65,7 +68,8 @@ result <- PubMatrix(
   B = genes_set2,
   Database = "pubmed",
   daterange = c(2010, 2024),
-  outfile = "my_results"
+  outfile = "my_results",
+  export_format = "csv"  # Options: NULL (no export), "csv", or "ods"
 )
 
 # Create a heatmap with Jaccard distance clustering
@@ -88,7 +92,8 @@ The main function that performs pairwise literature searches and generates co-oc
 | `API.key` | character | NULL | NCBI E-utilities API key (optional, increases rate limits) |
 | `Database` | character | "pubmed" | Database to search: "pubmed" or "pmc" |
 | `daterange` | numeric vector | NULL | Date range as c(start_year, end_year) |
-| `outfile` | character | NULL | Base filename for outputs (without extension) |
+| `outfile` | character | NULL | Base filename for outputs (without extension). Required if export_format is specified. |
+| `export_format` | character | NULL | Export format for the hyperlinked results matrix. Options: NULL (default, no file export), 'csv' (Excel-compatible with HYPERLINK formulas), or 'ods' (LibreOffice/OpenOffice format). |
 
 #### Return Value
 
@@ -267,11 +272,51 @@ results <- PubMatrix(
 
 ## Output Files
 
-When `outfile` is specified, PubMatrixR generates:
+When `outfile` and `export_format` parameters are specified, PubMatrixR generates a results file with clickable hyperlinks:
 
-1. **CSV Matrix** (`{outfile}_result.csv`): Contains the co-occurrence counts with clickable hyperlinks to PubMed searches
+#### Export Format Options
 
-The CSV file includes Excel-compatible hyperlink formulas that link directly to the corresponding PubMed search results.
+| Format | Parameter Value | File Extension | Use Case |
+|--------|-----------------|-----------------|----------|
+| **No Export** | `export_format = NULL` (default) | - | Results returned only to R environment, no file saved |
+| **CSV** | `export_format = "csv"` | `.csv` | Excel-compatible format with HYPERLINK formulas for direct linking to PubMed searches |
+| **ODS** | `export_format = "ods"` | `.ods` | LibreOffice/OpenOffice format with embedded hyperlinks, better for cross-platform compatibility |
+
+#### Output File Format
+
+The output filename follows the pattern: `{outfile}_result.{extension}`
+
+All formats include:
+- **Row names**: Terms from vector B
+- **Column names**: Terms from vector A
+- **Cell values**: Publication co-occurrence counts with clickable hyperlinks to the corresponding PubMed search
+
+#### Examples
+
+```r
+# No file export - results only in R
+result <- PubMatrix(A = genes, B = diseases, Database = "pubmed")
+
+# Export as CSV with hyperlinks
+result <- PubMatrix(
+  A = genes, 
+  B = diseases, 
+  Database = "pubmed",
+  outfile = "my_results",
+  export_format = "csv"
+)
+# Creates: my_results_result.csv
+
+# Export as ODS (LibreOffice format)
+result <- PubMatrix(
+  A = genes, 
+  B = diseases, 
+  Database = "pubmed",
+  outfile = "my_results",
+  export_format = "ods"
+)
+# Creates: my_results_result.ods
+```
 
 ## Visualization
 

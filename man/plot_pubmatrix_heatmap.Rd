@@ -41,6 +41,8 @@ plot_pubmatrix_heatmap(
 \item{cellwidth}{Optional numeric cell width for pheatmap (in pixels). Default `NA` lets pheatmap auto-size.}
 
 \item{cellheight}{Optional numeric cell height for pheatmap (in pixels). Default `NA` lets pheatmap auto-size.}
+
+\item{scale_font}{Logical value determining if font size should scale with cell size. Default is TRUE}
 }
 \value{
 A pheatmap object (invisible)
