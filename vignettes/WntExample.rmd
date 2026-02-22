@@ -41,7 +41,8 @@ B <- c(
 current_year <- format(Sys.Date(), "%Y")
 result <- PubMatrix(
   A = A,
-  B = B,
+  B = B,file = "Wnt_Fzs",
+  export_format = "ods",
   Database = "pubmed",
   daterange = c(1990, current_year),
   outfile = "pubmatrix_result"
