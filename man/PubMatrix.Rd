@@ -2,7 +2,7 @@
 % Please edit documentation in R/PubMatrix.R
 \name{PubMatrix}
 \alias{PubMatrix}
-\title{PubMatrix function}
+\title{Query PubMed or PMC and Build a Pairwise Co-occurrence Matrix}
 \usage{
 PubMatrix(
   file = NULL,
@@ -16,36 +16,50 @@ PubMatrix(
 )
 }
 \arguments{
-\item{file}{A file containing search terms (optional). If NULL, search terms will be read from A and B vectors.}
+\item{file}{Optional path to a text file containing search terms. The file
+must contain a `#` separator line between the `A` and `B` term lists. Used
+only when `A` and `B` are both `NULL`.}
 
-\item{A}{A vector of search terms to be paired with B. If NULL, search terms will be read from the file.}
+\item{A}{Character vector of search terms for matrix columns.}
 
-\item{B}{A vector of search terms to be paired with A. If NULL, search terms will be read from the file.}
+\item{B}{Character vector of search terms for matrix rows.}
 
-\item{API.key}{An API key obtained from Entrez; not necessary.}
+\item{API.key}{Optional NCBI API key.}
 
-\item{Database}{Either 'pubmed' or 'pmc'. Determines the database to search.}
+\item{Database}{Character scalar. One of `"pubmed"` or `"pmc"`.}
 
-\item{daterange}{A range of dates to search if desired. Should be a vector of two elements: the start and end date.}
+\item{daterange}{Optional numeric vector of length 2 giving
+`c(start_year, end_year)`.}
 
-\item{outfile}{A file path to export the search dataframe with hyperlinks. If NULL (default), no file will be exported. Ignored if export_format is not specified.}
+\item{outfile}{Optional output file stem used when `export_format` is set.}
 
-\item{export_format}{Format for exporting the hyperlinked dataframe with clickable links. Options are: NULL (default, no export), 'csv', or 'ods'. When NULL, only returns the dataframe to R without saving. 'csv' exports as Excel-compatible format with HYPERLINK formulas; 'ods' exports as OpenDocument Spreadsheet format compatible with LibreOffice/OpenOffice. Requires outfile parameter when not NULL.}
+\item{export_format}{Optional export format: `"csv"` or `"ods"`.}
 }
 \value{
-A dataframe of search results. Each element of the dataframe is the number of search results for a pair of search terms from A and B.
+A data frame of publication counts with rows named by `B` and columns
+  named by `A`.
 }
 \description{
-This function takes two vectors A and B, an API key, a database name,
-and performs a search operation on the specified database using the search terms from A and B.
-It then generates a dataframe of search results and optionally exports it as a .csv file.
-Use plot_pubmatrix_heatmap() to visualize the results as a heatmap.
+`PubMatrix()` counts publications for all pairwise combinations of two term
+sets using the NCBI Entrez E-utilities API. It returns a matrix-like data
+frame with rows corresponding to terms in `B` and columns corresponding to
+terms in `A`.
+}
+\details{
+Examples and vignettes should avoid live web queries during package
+checks. This function performs live requests to NCBI and may fail when there
+is no internet connectivity or when the service is unavailable.
 }
 \examples{
-# Note: This example requires internet connection
+# Construct terms locally (live query example kept commented for checks)
 A <- c("WNT1", "WNT2")
 B <- c("FZD1", "FZD2")
 # result <- PubMatrix(A = A, B = B, Database = "pubmed", daterange = c(2020, 2023))
 # print(result)
-message("Example commented out to avoid internet dependency in checks")
+message("Live query example is commented out to avoid web access during checks.")
+
+# Input validation examples (offline-safe)
+try(PubMatrix(A = NULL, B = NULL, file = NULL))
+try(PubMatrix(A = "a", B = "b", Database = "invalid_db"))
+
 }

@@ -1,452 +1,137 @@
-# Test suite for PubMatrixR package
-# Tests API functionality, internet access, and minimal reproducible examples
-
 library(testthat)
 library(PubMatrixR)
 
-# Helper function to check internet connectivity
-check_internet <- function() {
-  tryCatch(
-    {
-      readLines("https://www.ncbi.nlm.nih.gov/", n = 1, warn = FALSE)
-      return(TRUE)
-    },
-    error = function(e) {
-      return(FALSE)
-    }
+mock_counts <- function() {
+  c(
+    "A1 AND B1" = 11,
+    "A1 AND B2" = 12,
+    "A2 AND B1" = 21,
+    "A2 AND B2" = 22
   )
 }
 
-# Helper function to check NCBI API accessibility
-check_ncbi_api <- function() {
-  tryCatch(
-    {
-      url <- "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi?db=pubmed&term=test&retmax=1"
-      response <- xml2::read_html(url)
-      return(TRUE)
+local_mock_fetch_counts <- function(mapping = mock_counts()) {
+  local_mocked_bindings(
+    .pubmatrix_fetch_count = function(base_url, encoded_term, n_tries = 2L) {
+      decoded <- utils::URLdecode(encoded_term)
+      if (!decoded %in% names(mapping)) {
+        stop("Unexpected mocked term: ", decoded, call. = FALSE)
+      }
+      unname(mapping[[decoded]])
     },
-    error = function(e) {
-      return(FALSE)
-    }
+    .env = asNamespace("PubMatrixR")
   )
 }
 
-# Test 1: Internet Connectivity
-test_that("Internet connectivity is available", {
-  skip_on_cran()
-  skip_if_not(check_internet(), "No internet connection available")
-
-  expect_true(check_internet())
-})
-
-# Test 2: NCBI API Accessibility
-test_that("NCBI E-utilities API is accessible", {
-  skip_on_cran()
-  skip_if_not(check_internet(), "No internet connection available")
-
-  expect_true(check_ncbi_api())
-})
-
-# Test 3: Minimal Reproducible Example - Basic Function Call
-test_that("PubMatrix works with minimal example", {
-  skip_on_cran()
-  skip_if_not(check_internet(), "No internet connection available")
-  skip_if_not(check_ncbi_api(), "NCBI API not accessible")
-
-  # Define minimal test vectors
-  A <- c("insulin")
-  B <- c("diabetes")
-
-  # Run PubMatrix with minimal parameters
-  result <- PubMatrix(
-    A = A,
-    B = B,
-    Database = "pubmed",
-    daterange = c(2020, 2024),
-    outfile = NULL
-  )
-
-  # Basic assertions
-  expect_true(is.data.frame(result))
-  expect_equal(nrow(result), length(B))
-  expect_equal(ncol(result), length(A))
-  expect_true(all(sapply(result, is.numeric)))
-  expect_true(all(unlist(result) >= 0)) # Publication counts should be non-negative
-})
-
-# Test 4: Function Parameter Validation
-test_that("PubMatrix handles invalid parameters gracefully", {
-  # Test with NULL A and B (should require file parameter)
+test_that("PubMatrix validates inputs before attempting network access", {
   expect_error(
     PubMatrix(A = NULL, B = NULL, file = NULL),
     "Either provide vectors A and B, or specify a file containing search terms"
   )
 
-  # Test with invalid database
   expect_error(
-    PubMatrix(A = "test", B = "term", Database = "invalid_db"),
-    "Mismatched search results|Check NCBI response" # Should error on invalid database
+    PubMatrix(A = "a", B = "b", Database = "invalid_db"),
+    "Database must be one of 'pubmed' or 'pmc'"
+  )
+
+  expect_error(
+    PubMatrix(A = "a", B = "b", export_format = "xlsx", outfile = tempfile()),
+    "export_format must be either 'csv' or 'ods'"
+  )
+
+  expect_error(
+    PubMatrix(A = "a", B = "b", export_format = "csv", outfile = NULL),
+    "outfile must be provided when export_format is specified"
+  )
+
+  expect_error(
+    PubMatrix(A = "a", B = "b", daterange = c(2024, 2020)),
+    "daterange start year must be less than or equal to end year"
   )
 })
 
-# Test 5: Output Structure Validation
-test_that("PubMatrix returns correctly structured output", {
-  skip_on_cran()
-  skip_if_not(check_internet(), "No internet connection available")
-  skip_if_not(check_ncbi_api(), "NCBI API not accessible")
+test_that("PubMatrix parses file input and rejects malformed files deterministically", {
+  good_file <- tempfile(fileext = ".txt")
+  writeLines(c("A1", "A2", "#", "B1", "B2"), good_file)
+  bad_file <- tempfile(fileext = ".txt")
+  writeLines(c("A1", "A2", "B1", "B2"), bad_file)
 
-  A <- c("TP53", "BRCA1")
-  B <- c("cancer", "mutation")
+  local_mock_fetch_counts()
+
+  result <- PubMatrix(file = good_file, Database = "pubmed")
+  expect_equal(dim(result), c(2, 2))
+  expect_identical(rownames(result), c("B1", "B2"))
+  expect_identical(colnames(result), c("A1", "A2"))
+
+  expect_error(
+    PubMatrix(file = bad_file, Database = "pubmed"),
+    "File must contain '#' separator"
+  )
+
+  unlink(c(good_file, bad_file))
+})
+
+test_that("PubMatrix assembles matrix with rows from B and columns from A", {
+  local_mock_fetch_counts()
 
   result <- PubMatrix(
-    A = A,
-    B = B,
+    A = c("A1", "A2"),
+    B = c("B1", "B2"),
     Database = "pubmed",
-    daterange = c(2022, 2024),
-    outfile = NULL,
+    daterange = c(2020, 2021)
   )
 
-  # Check dimensions
-  expect_equal(dim(result), c(length(B), length(A)))
-
-  # Check that results are reasonable (should have some publications)
-  expect_true(any(result > 0)) # At least some searches should return results
-
-  # Check row and column names (if any)
-  if (!is.null(rownames(result))) {
-    expect_equal(length(rownames(result)), length(B))
-  }
-  if (!is.null(colnames(result))) {
-    expect_equal(length(colnames(result)), length(A))
-  }
+  expect_s3_class(result, "data.frame")
+  expect_equal(dim(result), c(2, 2))
+  expect_identical(rownames(result), c("B1", "B2"))
+  expect_identical(colnames(result), c("A1", "A2"))
+  expect_equal(unname(as.matrix(result)), matrix(c(11, 12, 21, 22), nrow = 2, ncol = 2))
 })
 
-# Test 6: Date Range Functionality
-test_that("Date range parameter works correctly", {
-  skip_on_cran()
-  skip_if_not(check_internet(), "No internet connection available")
-  skip_if_not(check_ncbi_api(), "NCBI API not accessible")
+test_that("PubMatrix exports CSV and ODS files using mocked counts", {
+  local_mock_fetch_counts()
 
-  A <- c("COVID-19")
-  B <- c("vaccine")
-
-  # Test with recent date range (should have results)
-  result_recent <- PubMatrix(
-    A = A,
-    B = B,
+  out_stem_csv <- tempfile()
+  result_csv <- PubMatrix(
+    A = c("A1", "A2"),
+    B = c("B1", "B2"),
     Database = "pubmed",
-    daterange = c(2020, 2024),
-    outfile = NULL,
-  )
-
-  # Test with very old date range (should have fewer/no results)
-  result_old <- PubMatrix(
-    A = A,
-    B = B,
-    Database = "pubmed",
-    daterange = c(1950, 1960),
-    outfile = NULL,
-  )
-
-  expect_true(result_recent[1, 1] > result_old[1, 1])
-})
-
-# Test 7: File Input Functionality
-test_that("File input works correctly", {
-  skip_on_cran()
-  skip_if_not(check_internet(), "No internet connection available")
-  skip_if_not(check_ncbi_api(), "NCBI API not accessible")
-
-  # Create temporary test file
-  temp_file <- tempfile(fileext = ".txt")
-  writeLines(c("insulin", "glucose", "#", "diabetes", "metabolism"), temp_file)
-
-  # Test file input
-  result <- PubMatrix(
-    file = temp_file,
-    Database = "pubmed",
-    daterange = c(2020, 2024),
-    outfile = NULL,
-  )
-
-  # Clean up
-  unlink(temp_file)
-
-  # Assertions
-  expect_true(is.data.frame(result))
-  expect_equal(nrow(result), 2) # 2 terms after #
-  expect_equal(ncol(result), 2) # 2 terms before #
-})
-
-# Test 8: Export Format NULL (default - no file export)
-test_that("export_format = NULL returns data only without file", {
-  skip_on_cran()
-  skip_if_not(check_internet(), "No internet connection available")
-  skip_if_not(check_ncbi_api(), "NCBI API not accessible")
-
-  A <- c("aspirin")
-  B <- c("cardiology")
-  temp_outfile <- tempfile()
-
-  result <- PubMatrix(
-    A = A,
-    B = B,
-    Database = "pubmed",
-    daterange = c(2020, 2024),
-    outfile = temp_outfile,
-    export_format = NULL  # Default - no file export
-  )
-
-  # Check that data is returned
-  expect_true(is.data.frame(result))
-  expect_equal(nrow(result), 1)
-  expect_equal(ncol(result), 1)
-
-  # Check that NO output file was created
-  csv_file <- paste0(temp_outfile, "_result.csv")
-  ods_file <- paste0(temp_outfile, "_result.ods")
-  expect_false(file.exists(csv_file))
-  expect_false(file.exists(ods_file))
-})
-
-# Test 9: CSV Output Functionality
-test_that("CSV output is created with export_format = 'csv'", {
-  skip_on_cran()
-  skip_if_not(check_internet(), "No internet connection available")
-  skip_if_not(check_ncbi_api(), "NCBI API not accessible")
-
-  A <- c("aspirin")
-  B <- c("cardiology")
-  temp_outfile <- tempfile()
-
-  result <- PubMatrix(
-    A = A,
-    B = B,
-    Database = "pubmed",
-    daterange = c(2020, 2024),
-    outfile = temp_outfile,
+    outfile = out_stem_csv,
     export_format = "csv"
   )
+  csv_file <- paste0(out_stem_csv, "_result.csv")
+  expect_true(file.exists(csv_file))
+  csv_data <- read.csv(csv_file, stringsAsFactors = FALSE, check.names = FALSE)
+  expect_true(any(grepl("HYPERLINK", unlist(csv_data), fixed = TRUE)))
+  expect_equal(dim(result_csv), c(2, 2))
 
-  # Check if output file was created
-  csv_file <- paste0(temp_outfile, "_result.csv")
-  expect_true(file.exists(csv_file), info = paste("Expected CSV file:", csv_file))
-
-  # Check CSV content
-  if (file.exists(csv_file)) {
-    csv_data <- read.csv(csv_file, stringsAsFactors = FALSE)
-    expect_true(nrow(csv_data) >= 1)
-    expect_true(ncol(csv_data) >= 2) # At least row names + 1 data column
-
-    # Check for HYPERLINK formulas
-    first_cell <- as.character(csv_data[1, 2])
-    expect_true(grepl("HYPERLINK", first_cell))
-
-    # Clean up
-    unlink(csv_file)
-  }
-})
-
-# Test 10: ODS Output Functionality
-test_that("ODS output is created with export_format = 'ods'", {
-  skip_on_cran()
-  skip_if_not(check_internet(), "No internet connection available")
-  skip_if_not(check_ncbi_api(), "NCBI API not accessible")
-
-  # Skip if readODS is not available
-  skip_if_not_installed("readODS")
-
-  A <- c("ibuprofen")
-  B <- c("inflammation")
-  temp_outfile <- tempfile()
-
-  result <- PubMatrix(
-    A = A,
-    B = B,
+  out_stem_ods <- tempfile()
+  result_ods <- PubMatrix(
+    A = c("A1", "A2"),
+    B = c("B1", "B2"),
     Database = "pubmed",
-    daterange = c(2020, 2024),
-    outfile = temp_outfile,
+    outfile = out_stem_ods,
     export_format = "ods"
   )
-
-  # Check if output file was created
-  ods_file <- paste0(temp_outfile, "_result.ods")
+  ods_file <- paste0(out_stem_ods, "_result.ods")
   expect_true(file.exists(ods_file))
+  ods_data <- readODS::read_ods(ods_file)
+  expect_true(nrow(ods_data) >= 2)
+  expect_equal(dim(result_ods), c(2, 2))
 
-  # Check ODS content by reading it back
-  if (file.exists(ods_file)) {
-    ods_data <- readODS::read_ods(ods_file)
-    expect_true(nrow(ods_data) >= 1)
-    expect_true(ncol(ods_data) >= 2)
-
-    # Clean up
-    unlink(ods_file)
-  }
+  unlink(c(csv_file, ods_file))
 })
 
-# Test 11: Export format validation
-test_that("Invalid export_format values are rejected", {
-  A <- c("test")
-  B <- c("term")
-
-  expect_error(
-    PubMatrix(
-      A = A,
-      B = B,
-      Database = "pubmed",
-      outfile = "test_output",
-      export_format = "xlsx"  # Invalid format
-    ),
-    "export_format must be either 'csv' or 'ods'"
+test_that("PubMatrix surfaces a clear network error from the fetch helper", {
+  local_mocked_bindings(
+    .pubmatrix_fetch_count = function(base_url, encoded_term, n_tries = 2L) {
+      stop("Failed to retrieve search count from NCBI after 2 attempt(s): offline", call. = FALSE)
+    },
+    .env = asNamespace("PubMatrixR")
   )
 
   expect_error(
-    PubMatrix(
-      A = A,
-      B = B,
-      Database = "pubmed",
-      outfile = "test_output",
-      export_format = "JSON"  # Invalid format
-    ),
-    "export_format must be either 'csv' or 'ods'"
+    PubMatrix(A = "a", B = "b", Database = "pubmed"),
+    "Failed to retrieve search count from NCBI"
   )
-})
-
-# Test 12: API Key Parameter
-test_that("API key parameter is handled correctly", {
-  skip_on_cran()
-  skip_if_not(check_internet(), "No internet connection available")
-  skip_if_not(check_ncbi_api(), "NCBI API not accessible")
-
-  A <- c("ibuprofen")
-  B <- c("inflammation")
-
-  # Test with NULL API key (should work)
-  result_no_key <- PubMatrix(
-    A = A,
-    B = B,
-    Database = "pubmed",
-    API.key = NULL,
-    daterange = c(2023, 2024),
-    outfile = NULL,
-  )
-
-  # Test with fake API key (should still work, just might be slower)
-  expect_no_error({
-    tryCatch(
-      {
-        result_fake_key <- PubMatrix(
-          A = A,
-          B = B,
-          Database = "pubmed",
-          API.key = "fake_key_for_testing",
-          daterange = c(2023, 2024),
-          outfile = NULL,
-        )
-
-        # Both should return data.frames
-        expect_true(is.data.frame(result_no_key))
-        expect_true(is.data.frame(result_fake_key))
-
-        # Results should be similar (same search, different API usage)
-        expect_equal(dim(result_no_key), dim(result_fake_key))
-      },
-      error = function(e) {
-        # Network errors are acceptable in testing environments
-        message("Network test failed (acceptable): ", e$message)
-      }
-    )
-  })
-})
-
-# Test 13: Multiple Database Support
-test_that("Different databases work correctly", {
-  skip_on_cran()
-  skip_if_not(check_internet(), "No internet connection available")
-  skip_if_not(check_ncbi_api(), "NCBI API not accessible")
-
-  A <- c("genetics")
-  B <- c("research")
-
-  # Test PubMed database
-  result_pubmed <- PubMatrix(
-    A = A,
-    B = B,
-    Database = "pubmed",
-    daterange = c(2023, 2024),
-    outfile = NULL,
-  )
-
-  # Test PMC database
-  result_pmc <- PubMatrix(
-    A = A,
-    B = B,
-    Database = "pmc",
-    daterange = c(2023, 2024),
-    outfile = NULL,
-  )
-
-  # Both should return valid data.frames
-  expect_true(is.data.frame(result_pubmed))
-  expect_true(is.data.frame(result_pmc))
-  expect_equal(dim(result_pubmed), dim(result_pmc))
-})
-
-# Test 14: Large Search Matrix Performance
-test_that("Function handles larger search matrices", {
-  skip_on_cran()
-  skip_if_not(check_internet(), "No internet connection available")
-  skip_if_not(check_ncbi_api(), "NCBI API not accessible")
-
-  # Create slightly larger test sets
-  A <- c("gene", "protein", "enzyme")
-  B <- c("cancer", "therapy", "treatment", "diagnosis")
-
-  # Measure execution time
-  start_time <- Sys.time()
-
-  result <- PubMatrix(
-    A = A,
-    B = B,
-    Database = "pubmed",
-    daterange = c(2023, 2024),
-    outfile = NULL,
-  )
-
-  end_time <- Sys.time()
-  execution_time <- as.numeric(difftime(end_time, start_time, units = "secs"))
-
-  # Assertions
-  expect_true(is.data.frame(result))
-  expect_equal(dim(result), c(length(B), length(A)))
-  expect_true(execution_time < 120) # Should complete within 2 minutes
-})
-
-# Test 12: Error Handling for Network Issues
-test_that("Function handles network errors gracefully", {
-  skip_on_cran()
-
-  # Mock a network error scenario by using an invalid URL
-  # This tests the error handling without relying on actual network issues
-  A <- c("test")
-  B <- c("term")
-
-  # Test should not crash even if network issues occur
-  expect_no_error({
-    tryCatch(
-      {
-        result <- PubMatrix(
-          A = A,
-          B = B,
-          Database = "pubmed",
-          daterange = c(2024, 2024),
-          outfile = NULL,
-        )
-      },
-      error = function(e) {
-        # Network errors are acceptable in testing
-        message("Network error caught (expected in some environments): ", e$message)
-      }
-    )
-  })
 })

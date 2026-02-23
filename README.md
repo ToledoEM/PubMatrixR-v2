@@ -1,19 +1,17 @@
-# PubMatrixR v2
+# PubMatrixR
 
 <img src="https://toledoem.github.io/img/LogoPubmatrix.png" align="right" width=150/>
-
 
 - Repository: [https://github.com/ToledoEM/PubMatrixR-v2](https://github.com/ToledoEM/PubMatrixR-v2)
 - Original code from: [https://github.com/tslaird/PubMatrixR](https://github.com/tslaird/PubMatrixR)
 - Based on paper : [PubMatrix: a tool for multiplex literature mining](https://pmc.ncbi.nlm.nih.gov/articles/PMC317283/) of **Becker KG et al. BMC Bioinformatics. 2003 Dec 10;4:61. doi: 10.1186/1471-2105-4-61**
 
-
-
 ## Overview
 
 **PubMatrixR** is an R package that performs systematic literature searches on PubMed and PMC databases using pairwise combinations of search terms. It creates co-occurrence matrices showing the number of publications that mention both terms from two different sets, enabling researchers to explore relationships between genes, diseases, pathways, or any other biomedical concepts.
 
-Original deprecated version from @tslaird. Current release v2 is updated to use tidyverse and incorporate graphical output of the analysis. 
+This repository maintains and extends the original `PubMatrixR` package with
+improved validation, offline-safe tests/vignettes, and heatmap helpers.
 
 ### Key Features
 
@@ -33,14 +31,20 @@ No installation required - just open the link and start analyzing!
 
 ## Installation
 
-You can install PubMatrixR from GitHub using:
+### CRAN (after acceptance)
 
 ```r
-# Install devtools if you haven't already
-if (!require(devtools)) install.packages("devtools")
+install.packages("PubMatrixR")
+```
+
+### GitHub (development version)
+
+```r
+# Install remotes if you haven't already
+if (!requireNamespace("remotes", quietly = TRUE)) install.packages("remotes")
 
 # Install PubMatrixR
-devtools::install_github("ToledoEM/PubMatrixR-v2")
+remotes::install_github("ToledoEM/PubMatrixR-v2")
 ```
 
 ### Dependencies
@@ -48,7 +52,6 @@ devtools::install_github("ToledoEM/PubMatrixR-v2")
 PubMatrixR requires the following R packages:
 
 - `pbapply` - Progress bars for apply functions
-- `stringr` - String manipulation
 - `pheatmap` - Static heatmap generation
 - `xml2` - XML parsing for API responses
 - `readODS` - To export results in OpenDocument Spreadsheet - Excel compatible - for hyperlink export.
@@ -72,7 +75,7 @@ result <- PubMatrix(
   export_format = "csv"  # Options: NULL (no export), "csv", or "ods"
 )
 
-# Create a heatmap with Jaccard distance clustering
+# Create a heatmap with overlap percentages and Euclidean clustering
 plot_pubmatrix_heatmap(result)
 ```
 
@@ -85,7 +88,7 @@ The main function that performs pairwise literature searches and generates co-oc
 #### Parameters
 
 | Parameter | Type | Default | Description |
-|-----------|------|---------|-------------|
+| --------- | ---- | ------- | ----------- |
 | `file` | character | - | Path to file containing search terms (alternative to A/B vectors) |
 | `A` | character vector | NULL | First set of search terms |
 | `B` | character vector | NULL | Second set of search terms |
@@ -97,10 +100,10 @@ The main function that performs pairwise literature searches and generates co-oc
 
 #### Return Value
 
-Returns a numeric matrix where:
+Returns a matrix-like data frame where:
 
-- Rows correspond to terms from vector `A`
-- Columns correspond to terms from vector `B`
+- Rows correspond to terms from vector `B`
+- Columns correspond to terms from vector `A`
 - Each cell contains the number of publications mentioning both terms
 
 #### File Input Format
@@ -125,20 +128,21 @@ PubMatrixR provides dedicated functions for creating heatmaps from PubMatrix res
 
 #### plot_pubmatrix_heatmap()
 
-Creates a formatted heatmap displaying **publication co-occurrence counts** in cells, with **Jaccard distance clustering** for row/column ordering. Jaccard distance is the clustering method used to group genes with similar co-occurrence patterns.
+Creates a formatted heatmap displaying **overlap percentages** in cells, with
+**Euclidean distance clustering** for row/column ordering.
 
-**Cell Values**: Publication co-occurrence counts
-**Clustering Method**: Jaccard distance calculated as 1 - (intersection/union) based on presence/absence patterns
+**Cell Values**: Overlap percentages derived from co-occurrence counts
+**Clustering Method**: Euclidean distance on the overlap percentage matrix
 
 ##### Heatmap Parameters
 
 | Parameter | Type | Default | Description |
-|-----------|------|---------|-------------|
+| --------- | ---- | ------- | ----------- |
 | `matrix` | numeric matrix | - | A PubMatrix result matrix containing publication co-occurrence counts |
 | `title` | character | "PubMatrix Co-occurrence Heatmap" | Heatmap title |
-| `cluster_rows` | logical | TRUE | Whether to cluster rows using Jaccard distance |
-| `cluster_cols` | logical | TRUE | Whether to cluster columns using Jaccard distance |
-| `show_numbers` | logical | TRUE | Display publication counts in cells |
+| `cluster_rows` | logical | TRUE | Whether to cluster rows using Euclidean distance |
+| `cluster_cols` | logical | TRUE | Whether to cluster columns using Euclidean distance |
+| `show_numbers` | logical | TRUE | Display overlap percentages in cells |
 | `filename` | character | NULL | Optional filename to save plot |
 
 ##### Example
@@ -147,7 +151,7 @@ Creates a formatted heatmap displaying **publication co-occurrence counts** in c
 # First generate a matrix
 result <- PubMatrix(A = c("gene1", "gene2"), B = c("disease1", "disease2"))
 
-# Create heatmap with Jaccard clustering
+# Create heatmap with overlap percentages and Euclidean clustering
 plot_pubmatrix_heatmap(result)
 
 # Save to file
@@ -156,13 +160,11 @@ plot_pubmatrix_heatmap(result, filename = "my_heatmap.png")
 
 #### pubmatrix_heatmap()
 
-Alternative heatmap function with additional customization options.
+Thin wrapper around `plot_pubmatrix_heatmap()` for quick visualization.
 
 ```r
-# Create customized heatmap
-pubmatrix_heatmap(result,
-                  color_scheme = "viridis",
-                  cluster_method = "complete")
+# Quick heatmap using defaults
+pubmatrix_heatmap(result, title = "Quick PubMatrix Heatmap")
 ```
 
 ## Examples
@@ -187,11 +189,11 @@ results <- PubMatrix(
 
 # View results
 print(results)
-#      apoptosis DNA repair cell cycle oncogene
-# TP53       1456        789       1234      567
-# BRCA1       234        1456        456      123
-# EGFR        567         123        890      789
-# MYC         890         234        567     1456
+#            TP53 BRCA1 EGFR  MYC
+# apoptosis  1456   234  567  890
+# DNA repair  789  1456  123  234
+# cell cycle 1234   456  890  567
+# oncogene    567   123  789 1456
 ```
 
 ### Using MSigDB Gene Sets
@@ -222,7 +224,7 @@ wnt_obesity_matrix <- PubMatrix(
   outfile = "wnt_obesity_cooccurrence"
 )
 
-# Create heatmap with Jaccard distance clustering
+# Create heatmap with overlap percentages and Euclidean clustering
 plot_pubmatrix_heatmap(wnt_obesity_matrix)
 ```
 
@@ -274,24 +276,25 @@ results <- PubMatrix(
 
 When `outfile` and `export_format` parameters are specified, PubMatrixR generates a results file with clickable hyperlinks:
 
-#### Export Format Options
+### Export Format Options
 
 | Format | Parameter Value | File Extension | Use Case |
-|--------|-----------------|-----------------|----------|
+| ------ | --------------- | -------------- | -------- |
 | **No Export** | `export_format = NULL` (default) | - | Results returned only to R environment, no file saved |
 | **CSV** | `export_format = "csv"` | `.csv` | Excel-compatible format with HYPERLINK formulas for direct linking to PubMed searches |
 | **ODS** | `export_format = "ods"` | `.ods` | LibreOffice/OpenOffice format with embedded hyperlinks, better for cross-platform compatibility |
 
-#### Output File Format
+### Output File Format
 
 The output filename follows the pattern: `{outfile}_result.{extension}`
 
 All formats include:
+
 - **Row names**: Terms from vector B
 - **Column names**: Terms from vector A
 - **Cell values**: Publication co-occurrence counts with clickable hyperlinks to the corresponding PubMed search
 
-#### Examples
+### Output Examples
 
 ```r
 # No file export - results only in R
@@ -323,7 +326,7 @@ result <- PubMatrix(
 Create heatmaps using the dedicated heatmap functions:
 
 ```r
-# Basic heatmap with Jaccard distance clustering and red gradient colors
+# Basic heatmap with overlap percentages and Euclidean clustering
 plot_pubmatrix_heatmap(your_matrix)
 
 # Save heatmap to file
@@ -335,7 +338,7 @@ plot_pubmatrix_heatmap(your_matrix,
 **Features of the visualization:**
 
 - **Cell Values**: Publication co-occurrence counts between gene pairs
-- **Clustering Method**: Jaccard distance based on presence/absence patterns (1 - intersection/union)
+- **Clustering Method**: Euclidean distance on overlap percentages
 - **Color Scale**: Custom red gradient from light pink (`#fee5d9`) to dark red (`#99000d`) representing publication counts
 - **Legend**: Shows "Publication Count" scale for interpreting cell values
 - **Publication Quality**: High-resolution output suitable for manuscripts and presentations
@@ -351,7 +354,7 @@ plot_pubmatrix_heatmap(your_matrix,
 
 To improve search speed and avoid rate limiting:
 
-1. Create a free NCBI account at <https://www.ncbi.nlm.nih.gov/account/>
+1. Create a free NCBI account at <https://account.ncbi.nlm.nih.gov/>
 2. Go to Account Settings → API Key Management
 3. Generate a new API key
 4. Use the key in the `API.key` parameter

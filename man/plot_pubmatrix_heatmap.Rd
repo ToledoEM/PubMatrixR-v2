@@ -28,7 +28,7 @@ plot_pubmatrix_heatmap(
 
 \item{cluster_cols}{Logical value determining if columns should be clustered using Euclidean distance. Default is TRUE}
 
-\item{show_numbers}{Logical value determining if Jaccard distance values should be displayed in cells. Default is TRUE}
+\item{show_numbers}{Logical value determining if overlap percentage values should be displayed in cells. Default is TRUE}
 
 \item{color_palette}{Color palette for the heatmap. Default uses a red gradient color scale}
 
@@ -48,14 +48,15 @@ plot_pubmatrix_heatmap(
 A pheatmap object (invisible)
 }
 \description{
-This function creates a heatmap displaying Jaccard distance values calculated from
-a PubMatrix result matrix, with Euclidean distance clustering for rows and columns.
+This function creates a heatmap displaying overlap percentages derived from a
+PubMatrix result matrix, with Euclidean distance clustering for rows and columns.
 }
 \details{
-The function displays Jaccard distance values in the heatmap cells (same as compute_jaccard_matrix)
-and uses Euclidean distance for clustering rows and columns. Jaccard distance is calculated as
-1 - (intersection/union) where intersection is the number of common non-zero elements
-and union is the total number of non-zero elements. NA values in the input matrix are converted to 0 before calculation to ensure stability.
+The function displays overlap percentages in heatmap cells and uses Euclidean
+distance for clustering rows and columns. Overlap percentages are computed
+from the observed co-occurrence counts using `intersection / union * 100`,
+where the union is derived from row and column totals. NA values in the input
+matrix are converted to 0 before calculation to ensure stability.
 }
 \examples{
 # Create a small test matrix

@@ -2,6 +2,11 @@
 ^renv\.lock$
 ^.*\.Rproj$
 ^\.Rproj\.user$
+^\.Rhistory$
+^\.gitignore$
+^\.DS_Store$
+^\.\.Rcheck$
+^.*\.Rcheck$
 ^doc$
 ^docs$
 ^Meta$

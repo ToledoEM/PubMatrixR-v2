@@ -1,11 +1,18 @@
 Package: PubMatrixR
-Version: 1.0.0
-Title: Search Entrez Using Boolean AND Queries
-Authors@R: c(person("Tyler", "Laird", email = "tylerscottlaird@gmail.com",
-    role = "aut"),
-    person("Toledo", "Enrique", email = "enriquetoledo@gmail.com", role = c("ctb", "cre"),
-    comment = c(ORCID = "0000-0002-1460-4708")))
-Description: Search two lists against each other on PubMed and obtain a resulting pairwise matrix. This package performs systematic literature searches using Boolean AND queries and creates co-occurrence matrices showing publication counts for term combinations. 
+Title: PubMed Pairwise Co-Occurrence Matrix Construction and Visualization
+Version: 0.1.0
+Authors@R: c(
+    person(given = "Tyler", family = "Laird",
+      email = "tylerscottlaird@gmail.com", role = "aut"),
+    person(given = "Enrique", family = "Toledo",
+      email = "enriquetoledo@gmail.com", role = c("aut", "cre"),
+      comment = c(ORCID = "0000-0002-1460-4708"))
+  )
+Description: Queries NCBI Entrez E-utilities to count pairwise
+    co-occurrences between two sets of terms in PubMed or PubMed Central.
+    It returns a matrix-like data frame of publication counts and can export
+    hyperlink-enabled results in CSV or ODS format. The package also provides
+    heatmap helpers for exploratory visualization of overlap patterns.
 Depends: R (>= 4.5.0)
 License: MIT + file LICENSE
 Encoding: UTF-8
@@ -13,17 +20,12 @@ URL: https://github.com/ToledoEM/PubMatrixR-v2
 BugReports: https://github.com/ToledoEM/PubMatrixR-v2/issues
 Imports:
     pbapply,
-    stringr,
     pheatmap,
-    xml2,
-    readODS    
-RoxygenNote: 7.3.3
-Suggests: 
+    readODS,
+    xml2
+Suggests:
     knitr,
     rmarkdown,
-    testthat (>= 3.0.0),
-    msigdf,
-    dplyr
+    testthat (>= 3.0.0)
 VignetteBuilder: knitr
-biocViews: AnnotationData, AnnotationHub
-
+RoxygenNote: 7.3.3
