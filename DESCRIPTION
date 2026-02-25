@@ -1,6 +1,6 @@
 Package: PubMatrixR
 Title: PubMed Pairwise Co-Occurrence Matrix Construction and Visualization
-Version: 0.1.0
+Version: 1.0.0
 Authors@R: c(
     person(given = "Tyler", family = "Laird",
       email = "tylerscottlaird@gmail.com", role = "aut"),
@@ -24,7 +24,11 @@ Imports:
     readODS,
     xml2
 Suggests:
+    dplyr,
+    ggplot2,
+    kableExtra,
     knitr,
+    msigdf,
     rmarkdown,
     testthat (>= 3.0.0)
 VignetteBuilder: knitr

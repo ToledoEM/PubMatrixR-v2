@@ -1,6 +1,8 @@
 # PubMatrixR NEWS
 
-## Changes in version 0.1.0
+This file is ordered with the most recent release at the top.
+
+## Changes in version 1.0.0
 
 ### Core functionality
 
@@ -34,7 +36,7 @@
 
 ### Packaging and documentation
 
-- Updated package metadata for a CRAN-oriented release (`Version: 0.1.0`,
+- Updated package metadata for a CRAN-oriented release (`Version: 1.0.0`,
   removed `biocViews`, cleaned imports/suggests, and refreshed `LICENSE`).
 - Added package-level documentation and updated `README.md`, Rd files, and
   `inst/CITATION` to match current behavior and examples.
@@ -44,3 +46,16 @@
 
 - Removed pkgdown configuration/generated `doc/` artifacts and the bundled
   `pubmatrix-app` Shiny subproject files from the package source tree.
+
+## Changes in version 0.9.0
+
+- Finalized the pre-CRAN/Bioconductor-oriented package line after iterative
+  "BioC optimization" updates and namespace fixes.
+- Added/updated the main `PubMatrix.R` implementation and related packaging
+  files during refactoring.
+- Added a bundled Shiny app subproject (`pubmatrix-app`) and deployment
+  metadata.
+- Added OpenDocument Spreadsheet (`.ods`) export support for result output.
+
+Relevant commits include `5618668`, `3c10f5d`, `fbc4846`, `1c52679`,
+`26e6597`, `591d458`, and `80699aa`.

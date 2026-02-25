@@ -12,3 +12,4 @@
 ^Meta$
 ^pubmatrix-app$
 ^_pkgdown\.yml$
+^\.git$
