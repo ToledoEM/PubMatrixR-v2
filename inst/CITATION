@@ -1,24 +1,30 @@
-bibentry(
-  bibtype = "Article",
-  title = "PubMatrix: A Tool for Multiplex Literature Mining",
-  author = c(
-    person("K. G.", "Becker"),
-    person("D. A.", "Hosack"),
-    person("G.", "Dennis"),
-    person("R. A.", "Lempicki"),
-    person("T. J.", "Bright"),
-    person("C.", "Cheadle"),
-    person("J.", "Engel")
+citHeader("To cite PubMatrixR in publications, please use:")
+
+citEntry(
+  entry = "Article",
+  title = "PubMatrix: a tool for multiplex literature mining",
+  author = personList(
+    as.person("K. G. Becker"),
+    as.person("D. A. Hosack"),
+    as.person("G. Jr Dennis"),
+    as.person("R. A. Lempicki"),
+    as.person("T. J. Bright"),
+    as.person("C. Cheadle"),
+    as.person("J. Engel")
   ),
   journal = "BMC Bioinformatics",
   year = "2003",
+  month = "Dec",
+  day = "10",
   volume = "4",
   pages = "61",
   doi = "10.1186/1471-2105-4-61",
+  pubmedid = "14667255",
   url = "https://pmc.ncbi.nlm.nih.gov/articles/PMC317283/",
   textVersion = paste(
-    "Becker KG, Hosack DA, Dennis G, Lempicki RA, Bright TJ, Cheadle C,",
-    "Engel J (2003). PubMatrix: a tool for multiplex literature mining.",
-    "BMC Bioinformatics, 4, 61. doi:10.1186/1471-2105-4-61."
+    "Becker KG, Hosack DA, Dennis G Jr, Lempicki RA, Bright TJ, Cheadle C, Engel J (2003).",
+    "\"PubMatrix: a tool for multiplex literature mining.\"",
+    "BMC Bioinformatics, 4, 61.",
+    "doi:10.1186/1471-2105-4-61. PMID: 14667255; PMCID: PMC317283."
   )
 )
