@@ -8,6 +8,9 @@ Authors@R: c(
       email = "enriquetoledo@gmail.com", role = c("aut", "cre"),
       comment = c(ORCID = "0000-0002-1460-4708"))
   )
+Author: Tyler Laird [aut],
+    Enrique Toledo [aut, cre] (ORCID: <https://orcid.org/0000-0002-1460-4708>)
+Maintainer: Enrique Toledo <enriquetoledo@gmail.com>
 Description: Queries NCBI Entrez E-utilities to count pairwise
     co-occurrences between two sets of terms in PubMed or PubMed Central.
     It returns a matrix-like data frame of publication counts and can export
