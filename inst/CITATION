@@ -1,16 +1,16 @@
 citHeader("To cite PubMatrixR in publications, please use:")
 
-citEntry(
-  entry = "Article",
+bibentry(
+  bibtype = "Article",
   title = "PubMatrix: a tool for multiplex literature mining",
-  author = personList(
-    as.person("K. G. Becker"),
-    as.person("D. A. Hosack"),
-    as.person("G. Jr Dennis"),
-    as.person("R. A. Lempicki"),
-    as.person("T. J. Bright"),
-    as.person("C. Cheadle"),
-    as.person("J. Engel")
+  author = c(
+    person(given = "K. G.", family = "Becker"),
+    person(given = "D. A.", family = "Hosack"),
+    person(given = "G. Jr", family = "Dennis"),
+    person(given = "R. A.", family = "Lempicki"),
+    person(given = "T. J.", family = "Bright"),
+    person(given = "C.", family = "Cheadle"),
+    person(given = "J.", family = "Engel")
   ),
   journal = "BMC Bioinformatics",
   year = "2003",
