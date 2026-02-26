@@ -13,6 +13,18 @@
 This repository maintains and extends the original `PubMatrixR` package with
 improved validation, offline-safe tests/vignettes, and heatmap helpers.
 
+## Branch Note (`dev_not_cran`)
+
+This branch restores the full vignette workflow for development and demonstration use, and is intentionally **not for CRAN submission**.
+
+Reasons this branch is not CRAN-safe:
+
+- The vignette loads and demonstrates `msigdf`, which is not available from CRAN mainstream repositories.
+- The vignette executes live NCBI PubMed/PMC queries during rendering (`PubMatrix()`), which requires internet access.
+- Vignette output depends on external services and current data/date, so renders are not fully deterministic/reproducible for checks.
+- The vignette includes an external image URL, which can trigger network fetches during rendering.
+- Live API calls can be slow or rate-limited, making automated checks more fragile.
+
 ### Key Features
 
 - **Pairwise Literature Search**: Automatically searches all combinations of terms from two vectors

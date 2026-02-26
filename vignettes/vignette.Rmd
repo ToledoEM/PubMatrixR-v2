@@ -21,11 +21,14 @@ knitr::opts_chunk$set(
   dpi = 150
 )
 ```
+<img src="https://toledoem.github.io/img/LogoPubmatrix.png" align="right" width=150/>
+
 ```{r setup, message=FALSE}
 library(PubMatrixR)
 library(knitr)
 library(kableExtra)
 library(dplyr)
+library(msigdf)
 library(pheatmap)
 library(ggplot2)
 ```
@@ -70,8 +73,6 @@ result <- PubMatrix(
 
 For this example, we'll extract genes related to WNT signaling and obesity from the MSigDB database:
 
-`msigdf` is optional and not required to build this vignette. The example below is shown for reference only and is not executed during package checks.
-
 ```{r gene_extraction, eval = FALSE}
 # Extract WNT-related genes
 A <- msigdf::msigdf.human %>%
@@ -108,8 +109,7 @@ B <- c("LEPR", "ADIPOQ", "PPARG", "TNF", "IL6", "ADRB2", "INSR")
 
 Now we'll search for co-occurrences between our gene sets in PubMed literature:
 
-```{r pubmatrix_analysis, eval = FALSE}
-# Intentionally not run during package checks: this performs live NCBI queries.
+```{r pubmatrix_analysis}
 # Run actual PubMatrix analysis
 current_year <- as.integer(format(Sys.Date(), "%Y"))
 result <- PubMatrix(
@@ -119,16 +119,6 @@ result <- PubMatrix(
   daterange = c(2020, current_year),
   outfile = "pubmatrix_result"
 )
-```
-
-```{r pubmatrix_analysis_offline}
-# Offline deterministic example used for vignette rendering/package checks.
-result <- outer(seq_along(B), seq_along(A), function(i, j) {
-  8 + (i * 6) + (j * 5) + ((i + j) %% 4) * 3 + ((i * j) %% 5)
-})
-result <- as.data.frame(result, check.names = FALSE)
-colnames(result) <- A
-rownames(result) <- B
 ```
 
 ### Results Table
@@ -262,8 +252,7 @@ plot_pubmatrix_heatmap(result,
 
 Asymmetric lists 
 
-```{r asymmetric_example, eval = FALSE}
-# Intentionally not run during package checks: this performs live NCBI queries.
+```{r asymmetric_example}
 A <- c("NCOR2", "NCSTN", "NKD1", "NOTCH1", "NOTCH4", "NUMB", "PPARD", "PSEN2", "PTCH1", "RBPJ", "SKP2", "TCF7", "TP53")
 
 
@@ -279,19 +268,6 @@ result <- PubMatrix(
   daterange = c(2020, current_year),
   outfile = "pubmatrix_result"
 )
-```
-
-```{r asymmetric_example_offline}
-# Offline deterministic example used for vignette rendering/package checks.
-A <- c("NCOR2", "NCSTN", "NKD1", "NOTCH1", "NOTCH4", "NUMB", "PPARD", "PSEN2", "PTCH1", "RBPJ", "SKP2", "TCF7", "TP53")
-B <- c("EIF1", "EIF1AX", "EIF2B1", "EIF2B2", "EIF2B3", "EIF2B4", "EIF2B5", "EIF2S1", "EIF2S2", "EIF2S3", "ELAVL1")
-
-result <- outer(seq_along(B), seq_along(A), function(i, j) {
-  12 + (i * 4) + (j * 3) + ((i * j) %% 9) + ((i + 2 * j) %% 6)
-})
-result <- as.data.frame(result, check.names = FALSE)
-colnames(result) <- A
-rownames(result) <- B
 ```
 
 ### Results Table
