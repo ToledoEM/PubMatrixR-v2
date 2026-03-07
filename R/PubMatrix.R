@@ -77,10 +77,10 @@
   daterange
 }
 
-#' Query PubMed or PMC and Build a Pairwise Co-occurrence Matrix
+#' Query 'PubMed' or 'PMC' and Build a Pairwise Co-occurrence Matrix
 #'
 #' `PubMatrix()` counts publications for all pairwise combinations of two term
-#' sets using the NCBI Entrez E-utilities API. It returns a matrix-like data
+#' sets using the 'NCBI' Entrez 'E-utilities' API. It returns a matrix-like data
 #' frame with rows corresponding to terms in `B` and columns corresponding to
 #' terms in `A`.
 #'
@@ -89,7 +89,7 @@
 #'   only when `A` and `B` are both `NULL`.
 #' @param A Character vector of search terms for matrix columns.
 #' @param B Character vector of search terms for matrix rows.
-#' @param API.key Optional NCBI API key.
+#' @param API.key Optional 'NCBI' API key.
 #' @param Database Character scalar. One of `"pubmed"` or `"pmc"`.
 #' @param daterange Optional numeric vector of length 2 giving
 #'   `c(start_year, end_year)`.
@@ -100,7 +100,7 @@
 #'   named by `A`.
 #'
 #' @details Examples and vignettes should avoid live web queries during package
-#' checks. This function performs live requests to NCBI and may fail when there
+#' checks. This function performs live requests to 'NCBI' and may fail when there
 #' is no internet connectivity or when the service is unavailable.
 #'
 #' @importFrom pbapply pblapply
@@ -109,14 +109,13 @@
 #' @importFrom xml2 read_xml xml_find_first xml_text
 #'
 #' @examples
-#' # Construct terms locally (live query example kept commented for checks)
+#' \donttest{
 #' A <- c("WNT1", "WNT2")
 #' B <- c("FZD1", "FZD2")
-#' # result <- PubMatrix(A = A, B = B, Database = "pubmed", daterange = c(2020, 2023))
-#' # print(result)
-#' message("Live query example is commented out to avoid web access during checks.")
+#' result <- PubMatrix(A = A, B = B, Database = "pubmed", daterange = c(2020, 2023))
+#' print(result)
+#' }
 #'
-#' # Input validation examples (offline-safe)
 #' try(PubMatrix(A = NULL, B = NULL, file = NULL))
 #' try(PubMatrix(A = "a", B = "b", Database = "invalid_db"))
 #'

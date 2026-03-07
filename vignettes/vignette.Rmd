@@ -139,7 +139,7 @@ The co-occurrence matrix shows the number of publications mentioning each pair o
 kable(result,
   caption = "Co-occurrence Matrix: WNT Genes vs Obesity Genes (Publication Counts)",
   align = "c",
-  format = "html"
+  format = if (knitr::pandoc_to() == "html") "html" else "markdown"
 ) %>%
   kableExtra::kable_styling(
     bootstrap_options = c("striped", "hover", "condensed"),
@@ -302,7 +302,7 @@ The co-occurrence matrix shows the number of publications mentioning each pair o
 kable(result,
   caption = "Co-occurrence Matrix: Longer Lists (Publication Counts)",
   align = "c",
-  format = "html"
+  format = if (knitr::pandoc_to() == "html") "html" else "markdown"
 ) %>%
   kableExtra::kable_styling(
     bootstrap_options = c("striped", "hover", "condensed"),

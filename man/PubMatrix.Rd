@@ -2,7 +2,7 @@
 % Please edit documentation in R/PubMatrix.R
 \name{PubMatrix}
 \alias{PubMatrix}
-\title{Query PubMed or PMC and Build a Pairwise Co-occurrence Matrix}
+\title{Query 'PubMed' or 'PMC' and Build a Pairwise Co-occurrence Matrix}
 \usage{
 PubMatrix(
   file = NULL,
@@ -24,7 +24,7 @@ only when `A` and `B` are both `NULL`.}
 
 \item{B}{Character vector of search terms for matrix rows.}
 
-\item{API.key}{Optional NCBI API key.}
+\item{API.key}{Optional 'NCBI' API key.}
 
 \item{Database}{Character scalar. One of `"pubmed"` or `"pmc"`.}
 
@@ -41,24 +41,23 @@ A data frame of publication counts with rows named by `B` and columns
 }
 \description{
 `PubMatrix()` counts publications for all pairwise combinations of two term
-sets using the NCBI Entrez E-utilities API. It returns a matrix-like data
+sets using the 'NCBI' Entrez 'E-utilities' API. It returns a matrix-like data
 frame with rows corresponding to terms in `B` and columns corresponding to
 terms in `A`.
 }
 \details{
 Examples and vignettes should avoid live web queries during package
-checks. This function performs live requests to NCBI and may fail when there
+checks. This function performs live requests to 'NCBI' and may fail when there
 is no internet connectivity or when the service is unavailable.
 }
 \examples{
-# Construct terms locally (live query example kept commented for checks)
+\donttest{
 A <- c("WNT1", "WNT2")
 B <- c("FZD1", "FZD2")
-# result <- PubMatrix(A = A, B = B, Database = "pubmed", daterange = c(2020, 2023))
-# print(result)
-message("Live query example is commented out to avoid web access during checks.")
+result <- PubMatrix(A = A, B = B, Database = "pubmed", daterange = c(2020, 2023))
+print(result)
+}
 
-# Input validation examples (offline-safe)
 try(PubMatrix(A = NULL, B = NULL, file = NULL))
 try(PubMatrix(A = "a", B = "b", Database = "invalid_db"))
 
