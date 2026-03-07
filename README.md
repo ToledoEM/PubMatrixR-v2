@@ -31,7 +31,7 @@ No installation required - just open the link and start analyzing!
 
 ## Installation
 
-### CRAN (after acceptance)
+### CRAN 
 
 ```r
 install.packages("PubMatrixR")
