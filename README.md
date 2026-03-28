@@ -1,6 +1,6 @@
 # PubMatrixR
 
-<img src="https://toledoem.github.io/img/LogoPubmatrix.png" align="right" width=150/>
+<img src="https://toledoem.github.io/img/LogoPubmatrixR.png" align="right" width=150/>
 
 - Repository: [https://github.com/ToledoEM/PubMatrixR-v2](https://github.com/ToledoEM/PubMatrixR-v2)
 - Original code from: [https://github.com/tslaird/PubMatrixR](https://github.com/tslaird/PubMatrixR)
