@@ -2,6 +2,11 @@
 
 <img src="https://toledoem.github.io/img/LogoPubmatrixR.png" align="right" width=150/>
 
+[![CRAN status](https://www.r-pkg.org/badges/version/PubMatrixR)](https://CRAN.R-project.org/package=PubMatrixR)
+[![CRAN Downloads](https://cranlogs.r-pkg.org/badges/PubMatrixR)](https://cran.r-project.org/package=PubMatrixR)
+[![R-CMD-check](https://github.com/ToledoEM/PubMatrixR-v2/workflows/R-CMD-check/badge.svg)](https://github.com/ToledoEM/PubMatrixR-v2/actions)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.20141396.svg)](https://doi.org/10.5281/zenodo.20141396)
+
 - Repository: [https://github.com/ToledoEM/PubMatrixR-v2](https://github.com/ToledoEM/PubMatrixR-v2)
 - Original code from: [https://github.com/tslaird/PubMatrixR](https://github.com/tslaird/PubMatrixR)
 - Based on paper : [PubMatrix: a tool for multiplex literature mining](https://pmc.ncbi.nlm.nih.gov/articles/PMC317283/) of **Becker KG et al. BMC Bioinformatics. 2003 Dec 10;4:61. doi: 10.1186/1471-2105-4-61**
