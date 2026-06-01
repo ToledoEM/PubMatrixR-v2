@@ -37,6 +37,7 @@ Useful links:
 
 Authors:
 \itemize{
+  \item Enrique Toledo \email{enriquetoledo@gmail.com} (\href{https://orcid.org/0000-0002-1460-4708}{ORCID})
   \item Tyler Laird \email{tylerscottlaird@gmail.com}
 }
 

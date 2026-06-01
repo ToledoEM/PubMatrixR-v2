@@ -109,7 +109,7 @@
 #' @importFrom xml2 read_xml xml_find_first xml_text
 #'
 #' @examples
-#' \donttest{
+#' \dontrun{
 #' A <- c("WNT1", "WNT2")
 #' B <- c("FZD1", "FZD2")
 #' result <- PubMatrix(A = A, B = B, Database = "pubmed", daterange = c(2020, 2023))

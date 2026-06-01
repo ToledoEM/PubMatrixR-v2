@@ -51,7 +51,7 @@ checks. This function performs live requests to 'NCBI' and may fail when there
 is no internet connectivity or when the service is unavailable.
 }
 \examples{
-\donttest{
+\dontrun{
 A <- c("WNT1", "WNT2")
 B <- c("FZD1", "FZD2")
 result <- PubMatrix(A = A, B = B, Database = "pubmed", daterange = c(2020, 2023))
