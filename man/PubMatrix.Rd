@@ -49,6 +49,21 @@ terms in `A`.
 Examples and vignettes should avoid live web queries during package
 checks. This function performs live requests to 'NCBI' and may fail when there
 is no internet connectivity or when the service is unavailable.
+
+Terms are trimmed of surrounding whitespace, and duplicate terms within `A`
+or within `B` are rejected. When reading from `file`, blank lines on either
+side of the `#` separator are ignored.
+
+Requests are paced to respect the 'NCBI' rate limits (3 requests per second
+without an API key, 10 with one). Two options tune the request behaviour:
+
+\itemize{
+  \item `PubMatrixR.n_tries` - number of attempts per query before giving up
+    (default `3`). Failed attempts back off exponentially.
+  \item `PubMatrixR.min_interval` - seconds to wait between requests
+    (default `0.34` without an API key, `0.11` with one). Set to `0` to
+    disable pacing.
+}
 }
 \examples{
 \dontrun{

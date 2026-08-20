@@ -28,6 +28,7 @@ See \code{citation("PubMatrixR")} for citation information.
 Useful links:
 \itemize{
   \item \url{https://github.com/ToledoEM/PubMatrixR-v2}
+  \item \url{https://toledoem.github.io/pubmatrixr/}
   \item Report bugs at \url{https://github.com/ToledoEM/PubMatrixR-v2/issues}
 }
 

@@ -1,10 +1,12 @@
 # PubMatrixR
 
-<img src="https://toledoem.github.io/img/LogoPubmatrixR.png" align="right" width=150/>
+<img src="https://toledoem.github.io/img/LogoPubmatrixR.png" align="right" width=150 alt="PubMatrixR logo"/>
 
+[![Lifecycle: stable](https://img.shields.io/badge/lifecycle-stable-brightgreen.svg)](https://lifecycle.r-lib.org/articles/stages.html#stable)
 [![CRAN status](https://www.r-pkg.org/badges/version/PubMatrixR)](https://CRAN.R-project.org/package=PubMatrixR)
 [![CRAN Downloads](https://cranlogs.r-pkg.org/badges/PubMatrixR)](https://cran.r-project.org/package=PubMatrixR)
 [![R-CMD-check](https://github.com/ToledoEM/PubMatrixR-v2/workflows/R-CMD-check/badge.svg)](https://github.com/ToledoEM/PubMatrixR-v2/actions)
+[![Codecov test coverage](https://codecov.io/gh/ToledoEM/PubMatrixR-v2/graph/badge.svg)](https://app.codecov.io/gh/ToledoEM/PubMatrixR-v2)
 <a href="https://doi.org/10.5281/zenodo.20141396"><img src="https://zenodo.org/badge/DOI/10.5281/zenodo.20141396.svg" alt="DOI" /></a>
 
 - Repository: [https://github.com/ToledoEM/PubMatrixR-v2](https://github.com/ToledoEM/PubMatrixR-v2)
@@ -133,11 +135,17 @@ PubMatrixR provides dedicated functions for creating heatmaps from PubMatrix res
 
 #### plot_pubmatrix_heatmap()
 
-Creates a formatted heatmap displaying **overlap percentages** in cells, with
-**Euclidean distance clustering** for row/column ordering.
+Draws a heatmap, clustering rows and columns by Euclidean distance. Cells show the raw co-occurrence counts unless you pass `values`.
 
-**Cell Values**: Overlap percentages derived from co-occurrence counts
-**Clustering Method**: Euclidean distance on the overlap percentage matrix
+##### Cell value options
+
+| `values` | Cell contents |
+| -------- | ------------- |
+| `"raw"` (default) | Publication co-occurrence counts |
+| `"row_pct"` | Each count as a percentage of its row total |
+| `"relative"` | `count / (row_total + col_total - count) * 100` |
+
+A warning about `"relative"`: it is not a Jaccard index, and its numbers do not carry across runs. The totals in that formula are sums over whichever partner terms happen to be in your matrix, not the publication count for each term on its own. Add one unrelated term and every existing cell changes. Compare cells inside a single matrix with it if you like, but do not compare between matrices.
 
 ##### Heatmap Parameters
 
@@ -147,7 +155,8 @@ Creates a formatted heatmap displaying **overlap percentages** in cells, with
 | `title` | character | "PubMatrix Co-occurrence Heatmap" | Heatmap title |
 | `cluster_rows` | logical | TRUE | Whether to cluster rows using Euclidean distance |
 | `cluster_cols` | logical | TRUE | Whether to cluster columns using Euclidean distance |
-| `show_numbers` | logical | TRUE | Display overlap percentages in cells |
+| `values` | character | "raw" | What each cell shows: "raw", "row_pct", or "relative" |
+| `show_numbers` | logical | TRUE | Display the plotted values in cells |
 | `filename` | character | NULL | Optional filename to save plot |
 
 ##### Example
@@ -331,8 +340,11 @@ result <- PubMatrix(
 Create heatmaps using the dedicated heatmap functions:
 
 ```r
-# Basic heatmap with overlap percentages and Euclidean clustering
+# Basic heatmap: raw co-occurrence counts with Euclidean clustering
 plot_pubmatrix_heatmap(your_matrix)
+
+# Percentage views
+plot_pubmatrix_heatmap(your_matrix, values = "row_pct")
 
 # Save heatmap to file
 plot_pubmatrix_heatmap(your_matrix,
@@ -340,13 +352,7 @@ plot_pubmatrix_heatmap(your_matrix,
                        title = "Custom Title")
 ```
 
-**Features of the visualization:**
-
-- **Cell Values**: Publication co-occurrence counts between gene pairs
-- **Clustering Method**: Euclidean distance on overlap percentages
-- **Color Scale**: Custom red gradient from light pink (`#fee5d9`) to dark red (`#99000d`) representing publication counts
-- **Legend**: Shows "Publication Count" scale for interpreting cell values
-- **Publication Quality**: High-resolution output suitable for manuscripts and presentations
+Cells hold publication co-occurrence counts by default, or percentages if you set `values`. Rows and columns are clustered by Euclidean distance on whatever matrix ends up being plotted. The colour scale runs from light pink (`#fee5d9`) to dark red (`#99000d`), and saved output is 300 dpi, which is enough for print.
 
 ## Performance Notes
 

@@ -6,6 +6,7 @@
 \usage{
 plot_pubmatrix_heatmap(
   matrix,
+  values = c("raw", "row_pct", "relative"),
   title = "PubMatrix Co-occurrence Heatmap",
   cluster_rows = TRUE,
   cluster_cols = TRUE,
@@ -21,6 +22,11 @@ plot_pubmatrix_heatmap(
 }
 \arguments{
 \item{matrix}{A data frame or matrix from PubMatrix results containing publication co-occurrence counts}
+
+\item{values}{Character scalar selecting what is plotted in each cell. One of
+`"raw"` (default, the co-occurrence counts as returned by [PubMatrix()]),
+`"row_pct"` (each cell as a percentage of its row total), or `"relative"`
+(see Details).}
 
 \item{title}{Character string for the heatmap title. Default is "PubMatrix Co-occurrence Heatmap"}
 
@@ -45,18 +51,33 @@ plot_pubmatrix_heatmap(
 \item{scale_font}{Logical value determining if font size should scale with cell size. Default is TRUE}
 }
 \value{
-A pheatmap object (invisible)
+A pheatmap object (invisible). The matrix actually plotted is
+  attached as the `"plotted_values"` attribute.
 }
 \description{
 This function creates a heatmap displaying overlap percentages derived from a
 PubMatrix result matrix, with Euclidean distance clustering for rows and columns.
 }
 \details{
-The function displays overlap percentages in heatmap cells and uses Euclidean
-distance for clustering rows and columns. Overlap percentages are computed
-from the observed co-occurrence counts using `intersection / union * 100`,
-where the union is derived from row and column totals. NA values in the input
-matrix are converted to 0 before calculation to ensure stability.
+Rows and columns are clustered with Euclidean distance. NA values in the
+input matrix are converted to 0 before any calculation.
+
+The `values` argument controls what each cell shows:
+
+\itemize{
+  \item `"raw"` (default) - the co-occurrence counts themselves.
+  \item `"row_pct"` - each count as a percentage of its row total, useful
+    for comparing how one row's attention is distributed across columns.
+  \item `"relative"` - `count / (row_total + col_total - count) * 100`,
+    where the totals are sums over the supplied matrix.
+}
+
+Note that `"relative"` is **not** a Jaccard index and is **not comparable
+across runs**. Its totals are sums over whichever partner terms happen to be
+in the matrix, not the marginal publication counts for each term, so adding
+an unrelated term changes the value reported for every existing cell. A true
+Jaccard index would require the single-term counts, which [PubMatrix()] does
+not fetch. Use it only to compare cells within one fixed matrix.
 }
 \examples{
 # Create a small test matrix
@@ -64,14 +85,15 @@ test_matrix <- matrix(c(1, 2, 3, 4), nrow = 2, ncol = 2)
 rownames(test_matrix) <- c("Gene1", "Gene2")
 colnames(test_matrix) <- c("GeneA", "GeneB")
 
-# Create heatmap using the helper
+# Create heatmap using the helper (plots the raw counts by default)
 plot_pubmatrix_heatmap(test_matrix, title = "Test Heatmap")
 
+# Percentage views are available too:
+plot_pubmatrix_heatmap(test_matrix, values = "row_pct", title = "Row \%")
+
 # Equivalent using pheatmap directly:
-# Compute overlap matrix as the function does (here trivial because counts are raw)
-overlap_matrix <- test_matrix
 pheatmap::pheatmap(
-  overlap_matrix,
+  test_matrix,
   main = "Test Heatmap (pheatmap)",
   color = colorRampPalette(c("#fee5d9", "#cb181d"))(100),
   display_numbers = TRUE,
