@@ -1,0 +1,222 @@
+---
+title: "PubMatrixR with Ligand Receptors"
+subtitle: "A comprehensive guide to analyzing publication relationships"
+output: rmarkdown::html_vignette
+author: "ToledoEM"
+date: "`r Sys.Date()`"
+vignette: >
+  %\VignetteIndexEntry{PubMatrixR with Ligand Receptors}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+
+<img src="https://toledoem.github.io/img/LogoPubmatrix.png" align="right" width=150 alt="PubMatrixR logo"/>
+
+## Introduction
+
+WNT ligands and their receptors do not pair off neatly. A given ligand can bind several receptors, and the literature reflects that: some ligand-receptor combinations turn up in paper after paper, others almost never.
+
+This vignette counts those co-occurrences. It compares 19 WNT ligands against 15 receptors (FZD1-10, LRP5/6, ROR1/2, RYK), which gives a 15x19 grid of PubMed counts. Bear in mind what the numbers actually measure: how often two gene symbols appear in the same record, not whether the paper found them to interact.
+
+```{r setup, message=FALSE}
+library(PubMatrixR)
+library(knitr)
+library(kableExtra)
+library(dplyr)
+library(pheatmap)
+library(ggplot2)
+```
+
+```{r setup-live-flag, include = FALSE}
+# To render this vignette with real NCBI data instead of the offline
+# fallback, set PUBMATRIX_LIVE_VIGNETTE=true (optionally with NCBI_API_KEY
+# for a higher rate limit) before rendering, e.g.:
+#
+#   NCBI_API_KEY=your_api_key_here PUBMATRIX_LIVE_VIGNETTE=true \
+#     Rscript -e 'pkgdown::build_site()'
+#
+# Left unset (the default, including in CI), both chunks below use the
+# offline synthetic matrix and no network calls are made.
+live <- identical(Sys.getenv("PUBMATRIX_LIVE_VIGNETTE"), "true")
+
+ncbi_api_key <- Sys.getenv("NCBI_API_KEY", unset = "")
+if (!nzchar(ncbi_api_key)) ncbi_api_key <- NULL
+```
+
+```{r gene_lists}
+A <- c(
+  "WNT1", "WNT2", "WNT2B", "WNT3", "WNT3A", "WNT4", "WNT5A", "WNT5B",
+  "WNT6", "WNT7A", "WNT7B", "WNT8A", "WNT8B", "WNT9A", "WNT9B",
+  "WNT10A", "WNT10B", "WNT11", "WNT16"
+)
+
+B <- c(
+  "FZD1", "FZD2", "FZD3", "FZD4", "FZD5", "FZD6", "FZD7",
+  "FZD8", "FZD9", "FZD10", "LRP5", "LRP6", "ROR1", "ROR2", "RYK"
+)
+```
+
+## Running the search
+
+A grid this size is 285 separate PubMed searches. With an API key that takes about half a minute; without one, closer to two. The vignette skips the live call by default and fills in a synthetic matrix, so the page builds whether or not NCBI is reachable. Every number below is fake. Swap in your own gene lists and run the live version to get real ones.
+
+### NCBI API Key (Recommended)
+
+For better performance and higher rate limits, we recommend obtaining an NCBI API key:
+
+- **Without API key**: 3 requests per second
+- **With API key**: 10 requests per second
+
+To obtain your free NCBI API key, visit: <https://support.nlm.nih.gov/kbArticle/?pn=KA-05317>
+
+Once you have your API key, pass it to `PubMatrix()` like this:
+
+```{r api_key_example, eval = FALSE}
+result <- PubMatrix(
+  A = A,
+  B = B,
+  API.key = "your_api_key_here",
+  Database = "pubmed"
+)
+```
+
+For live rendering, this vignette picks up the key from the `NCBI_API_KEY`
+environment variable instead of hardcoding it, so no key is stored in the
+file:
+
+```bash
+NCBI_API_KEY=your_api_key_here PUBMATRIX_LIVE_VIGNETTE=true \
+  Rscript -e 'pkgdown::build_site()'
+```
+
+```{r pubmatrix_analysis, eval = live}
+current_year <- as.integer(format(Sys.Date(), "%Y"))
+result <- PubMatrix(
+  A = A,
+  B = B,
+  API.key = ncbi_api_key,
+  Database = "pubmed",
+  daterange = c(1990, current_year),
+  outfile = "pubmatrix_result"
+)
+```
+
+```{r pubmatrix_analysis_offline, eval = !live}
+# Offline deterministic example used for vignette rendering/package checks.
+result <- outer(seq_along(B), seq_along(A), function(i, j) {
+  10 + (i * 5) + (j * 4) + ((i + j) %% 5) * 2 + ((i * j) %% 6)
+})
+result <- as.data.frame(result, check.names = FALSE)
+colnames(result) <- A
+rownames(result) <- B
+```
+
+
+## Which genes get the most attention
+
+Before looking at pairs, check the totals. These bar charts sum each gene's row or column and colour it by its strongest partner on the other list, so you can see which receptor dominates a given ligand's literature and the other way round.
+
+```{r bar_plots, fig.width=10, fig.height=7, out.width="100%", dpi=150}
+# Create data frame for List A genes (rows) colored by List B genes (columns)
+a_genes_data <- data.frame(
+  gene = rownames(result),
+  total_pubs = rowSums(result),
+  stringsAsFactors = FALSE
+)
+
+# Add color coding based on max overlap with B genes
+a_genes_data$max_b_gene <- apply(result, 1, function(x) colnames(result)[which.max(x)])
+a_genes_data$max_overlap <- apply(result, 1, max)
+
+# Create data frame for List B genes (columns) colored by List A genes (rows)
+b_genes_data <- data.frame(
+  gene = colnames(result),
+  total_pubs = colSums(result),
+  stringsAsFactors = FALSE
+)
+
+# Add color coding based on max overlap with A genes
+b_genes_data$max_a_gene <- apply(result, 2, function(x) rownames(result)[which.max(x)])
+b_genes_data$max_overlap <- apply(result, 2, max)
+
+# Plot A genes colored by their strongest B gene partner
+p1 <- ggplot(a_genes_data, aes(x = reorder(gene, total_pubs), y = total_pubs, fill = max_b_gene)) +
+  geom_bar(stat = "identity") +
+  coord_flip() +
+  labs(
+    title = "List A Genes by Publication Count",
+    subtitle = "Colored by strongest List B gene partner",
+    x = "Genes (List A)",
+    y = "Total Publications",
+    fill = "Strongest B Partner"
+  ) +
+  theme_minimal() +
+  theme(legend.position = "bottom") +
+  scale_fill_viridis_d()
+
+
+# Plot B genes colored by their strongest A gene partner
+p2 <- ggplot(b_genes_data, aes(x = reorder(gene, total_pubs), y = total_pubs, fill = max_a_gene)) +
+  geom_bar(stat = "identity") +
+  coord_flip() +
+  labs(
+    title = "List B Genes by Publication Count",
+    subtitle = "Colored by strongest List A gene partner",
+    x = "Genes (List B)",
+    y = "Total Publications",
+    fill = "Strongest A Partner"
+  ) +
+  theme_minimal() +
+  theme(legend.position = "bottom") +
+  scale_fill_viridis_d()
+
+
+print(p1)
+print(p2)
+```
+
+
+## The full matrix
+
+Raw PubMed publication counts for every ligand-receptor pair. Rows are FZD/LRP/ROR/RYK receptors, columns are WNT ligands.
+
+```{r results_table}
+kable(result,
+  caption = "Co-occurrence Matrix: WNT Genes (Publication Counts)",
+  align = "c",
+  format = if (knitr::pandoc_to() == "html") "html" else "markdown"
+) %>%
+  kableExtra::kable_styling(
+    bootstrap_options = c("striped", "hover", "condensed"),
+    full_width = FALSE,
+    position = "center"
+  ) %>%
+  kableExtra::add_header_above(c(" " = 1, "Wnt Genes" = length(A)))
+```
+
+
+
+## Heatmaps
+
+Nobody reads a 15x19 table of numbers. The heatmap shows the same data as colour, and `show_numbers = TRUE` keeps the counts in the cells if you still want them.
+
+```{r heatmap_with_numbers, fig.width=8, fig.height=6, out.width="100%", dpi=150}
+plot_pubmatrix_heatmap(
+  matrix = result,
+  title = "WNT - Ligands v/s Receptors",
+  show_numbers = TRUE
+)
+```
+
+Dropping the numbers makes the pattern easier to see when you care about the shape rather than the exact counts.
+
+```{r heatmap_clean, fig.width=8, fig.height=6, out.width="100%", dpi=150}
+pubmatrix_heatmap(matrix = result)
+```
+
+## System Information
+
+```{r system_info}
+sessionInfo()
+```

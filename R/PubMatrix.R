@@ -14,13 +14,14 @@
   count_value
 }
 
-.pubmatrix_fetch_count <- function(base_url, encoded_term, n_tries = 2L) {
+.pubmatrix_fetch_count <- function(base_url, encoded_term, n_tries = 3L) {
   n_tries <- as.integer(n_tries)
   if (is.na(n_tries) || n_tries < 1L) {
     n_tries <- 1L
   }
 
-  query_url <- paste0(base_url, "&term=", encoded_term, "&usehistory=y")
+  # retmax=0 keeps NCBI from returning PMIDs we never read; only <Count> matters.
+  query_url <- paste0(base_url, "&term=", encoded_term, "&retmax=0")
   last_error <- NULL
 
   for (attempt in seq_len(n_tries)) {
@@ -43,7 +44,9 @@
     last_error <- result$error
 
     if (attempt < n_tries) {
-      Sys.sleep(0.25)
+      # Exponential backoff: a rate-limited request retried immediately is
+      # simply rate-limited again.
+      Sys.sleep(0.25 * 2^(attempt - 1L))
     }
   }
 
@@ -54,6 +57,55 @@
     conditionMessage(last_error),
     call. = FALSE
   )
+}
+
+# Internal helper: split a term file on its '#' separator into A and B vectors.
+.pubmatrix_read_terms <- function(file) {
+  if (!file.exists(file)) {
+    stop("file does not exist: ", file, call. = FALSE)
+  }
+
+  file_content <- readLines(file, warn = FALSE)
+  sep_idx <- match("#", trimws(file_content))
+  if (is.na(sep_idx)) {
+    stop("File must contain '#' separator between A and B term lists: ", file,
+         call. = FALSE)
+  }
+
+  # seq.int() counts backwards when the separator is the final line, so slice
+  # the two sides explicitly instead.
+  before <- if (sep_idx > 1L) file_content[seq_len(sep_idx - 1L)] else character(0)
+  after <- if (sep_idx < length(file_content)) {
+    file_content[(sep_idx + 1L):length(file_content)]
+  } else {
+    character(0)
+  }
+
+  # Blank and whitespace-only lines are editor noise, not search terms.
+  A <- trimws(before)
+  A <- A[nzchar(A)]
+  B <- trimws(after)
+  B <- B[nzchar(B)]
+
+  if (length(A) == 0L) {
+    stop("No terms found before the '#' separator in: ", file, call. = FALSE)
+  }
+  if (length(B) == 0L) {
+    stop("No terms found after the '#' separator in: ", file, call. = FALSE)
+  }
+
+  list(A = A, B = B)
+}
+
+# Internal helper: seconds to wait between requests, per NCBI rate limits.
+.pubmatrix_min_interval <- function(has_api_key) {
+  default <- if (isTRUE(has_api_key)) 0.11 else 0.34
+  interval <- getOption("PubMatrixR.min_interval", default)
+  if (!is.numeric(interval) || length(interval) != 1L || !is.finite(interval) ||
+      interval < 0) {
+    return(default)
+  }
+  interval
 }
 
 .pubmatrix_validate_daterange <- function(daterange) {
@@ -103,6 +155,21 @@
 #' checks. This function performs live requests to 'NCBI' and may fail when there
 #' is no internet connectivity or when the service is unavailable.
 #'
+#' Terms are trimmed of surrounding whitespace, and duplicate terms within `A`
+#' or within `B` are rejected. When reading from `file`, blank lines on either
+#' side of the `#` separator are ignored.
+#'
+#' Requests are paced to respect the 'NCBI' rate limits (3 requests per second
+#' without an API key, 10 with one). Two options tune the request behaviour:
+#'
+#' \itemize{
+#'   \item `PubMatrixR.n_tries` - number of attempts per query before giving up
+#'     (default `3`). Failed attempts back off exponentially.
+#'   \item `PubMatrixR.min_interval` - seconds to wait between requests
+#'     (default `0.34` without an API key, `0.11` with one). Set to `0` to
+#'     disable pacing.
+#' }
+#'
 #' @importFrom pbapply pblapply
 #' @importFrom readODS write_ods
 #' @importFrom utils URLencode write.csv
@@ -146,18 +213,10 @@ PubMatrix <- function(file = NULL, A = NULL, B = NULL, API.key = NULL,
     if (missing(file) || is.null(file)) {
       stop("Either provide vectors A and B, or specify a file containing search terms.", call. = FALSE)
     }
-    if (!file.exists(file)) {
-      stop("file does not exist: ", file, call. = FALSE)
-    }
 
-    file_content <- readLines(file, warn = FALSE)
-    sep_idx <- match("#", file_content)
-    if (is.na(sep_idx)) {
-      stop("File must contain '#' separator between A and B term lists.", call. = FALSE)
-    }
-
-    A <- file_content[seq_len(sep_idx - 1L)]
-    B <- file_content[seq.int(sep_idx + 1L, length(file_content))]
+    terms <- .pubmatrix_read_terms(file)
+    A <- terms$A
+    B <- terms$B
   } else if (is.null(A) || is.null(B)) {
     stop("Provide both A and B when file is NULL.", call. = FALSE)
   }
@@ -169,8 +228,17 @@ PubMatrix <- function(file = NULL, A = NULL, B = NULL, API.key = NULL,
     stop("Both A and B must contain at least one search term.", call. = FALSE)
   }
 
-  if (anyNA(A) || anyNA(B) || any(!nzchar(A)) || any(!nzchar(B))) {
+  if (anyNA(A) || anyNA(B) || any(!nzchar(trimws(A))) || any(!nzchar(trimws(B)))) {
     stop("A and B must contain non-empty, non-missing search terms.", call. = FALSE)
+  }
+
+  A <- trimws(A)
+  B <- trimws(B)
+
+  # Columns are assigned positionally below, but duplicate names would still
+  # make the result ambiguous to index - reject them outright.
+  if (anyDuplicated(A) || anyDuplicated(B)) {
+    stop("A and B must not contain duplicate terms.", call. = FALSE)
   }
 
   # Build search combinations and encoded query terms.
@@ -189,7 +257,8 @@ PubMatrix <- function(file = NULL, A = NULL, B = NULL, API.key = NULL,
     "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi?",
     "db=", Database
   )
-  if (!is.null(API.key) && nzchar(as.character(API.key)[1])) {
+  has_api_key <- !is.null(API.key) && nzchar(as.character(API.key)[1])
+  if (has_api_key) {
     base_url <- paste0(base_url, "&api_key=", utils::URLencode(as.character(API.key)[1], reserved = TRUE))
   }
   if (!is.null(daterange)) {
@@ -201,11 +270,24 @@ PubMatrix <- function(file = NULL, A = NULL, B = NULL, API.key = NULL,
     )
   }
 
-  n_tries <- getOption("PubMatrixR.n_tries", 2L)
+  n_tries <- getOption("PubMatrixR.n_tries", 3L)
+  min_interval <- .pubmatrix_min_interval(has_api_key)
+  n_terms <- length(encoded_search_terms)
+
   z <- unlist(
     pbapply::pblapply(
-      encoded_search_terms,
-      function(term) .pubmatrix_fetch_count(base_url, term, n_tries = n_tries)
+      seq_len(n_terms),
+      function(i) {
+        count <- .pubmatrix_fetch_count(
+          base_url, encoded_search_terms[[i]], n_tries = n_tries
+        )
+        # Pace requests to stay under the NCBI ceiling (3/s without a key,
+        # 10/s with one). No need to wait after the final request.
+        if (i < n_terms && min_interval > 0) {
+          Sys.sleep(min_interval)
+        }
+        count
+      }
     ),
     use.names = FALSE
   )
@@ -221,14 +303,15 @@ PubMatrix <- function(file = NULL, A = NULL, B = NULL, API.key = NULL,
   }
 
   # Build the matrix-like result data frame (rows = B, columns = A).
-  result_dataframe <- data.frame(B_term = B, stringsAsFactors = FALSE)
-  for (i in seq_along(A)) {
-    start_index <- (i - 1L) * length(B) + 1L
-    end_index <- i * length(B)
-    result_dataframe[[A[i]]] <- z[start_index:end_index]
-  }
-  rownames(result_dataframe) <- result_dataframe$B_term
-  result_dataframe$B_term <- NULL
+  # Assign positionally: name-based assignment silently collapses columns when
+  # a term repeats.
+  result_matrix <- matrix(
+    z,
+    nrow = length(B),
+    ncol = length(A),
+    dimnames = list(B, A)
+  )
+  result_dataframe <- as.data.frame(result_matrix, check.names = FALSE)
 
   # Optional export with hyperlink formulas.
   if (!is.null(outfile) && !is.null(export_format)) {

@@ -1,8 +1,26 @@
-# PubMatrixR NEWS
+# PubMatrixR 1.0.1
 
-This file is ordered with the most recent release at the top.
+### Breaking changes
 
-## Changes in version 1.0.0
+- `plot_pubmatrix_heatmap()` and `pubmatrix_heatmap()` now plot raw co-occurrence counts by default, and take a new `values` argument to choose otherwise. Earlier versions always plotted a percentage the docs called `intersection / union * 100`, but the totals in that formula were row and column sums of whatever matrix you passed in, not the publication counts for each term on its own. Adding an unrelated term changed the number shown in every other cell. The old calculation is still there as `values = "relative"`, now documented with that caveat. `values = "row_pct"` divides each count by its row total.
+
+### Bug fixes
+
+- `PubMatrix()` no longer drops columns when `A` repeats a term, or rows when `B` does. Duplicates now raise an error, and the result matrix is filled positionally instead of by name.
+- Character matrices passed to the heatmap helpers keep their row names. A single-row matrix no longer comes back transposed into a single column.
+- Term file parsing handles blank lines, and a `#` separator on the first or last line now gives an error that names the file instead of complaining about missing terms.
+- A matrix where every value is the same now warns and draws a single-colour heatmap. It used to stop with an error.
+- Heatmap validation errors no longer print internal call context.
+
+### Other improvements
+
+- Requests are spaced out to stay under the NCBI rate limits: 3 per second without an API key, 10 with one. Set `PubMatrixR.min_interval` to override.
+- Failed queries back off exponentially between retries, and the default number of attempts (`PubMatrixR.n_tries`) is now 3. Both options are documented.
+- Queries drop `usehistory=y` and set `retmax=0`, so responses no longer carry PMIDs the package never looks at.
+- Added coverage reporting through covr and Codecov, and set `Config/testthat/edition: 3`.
+- The test suite went from 29 assertions to 73.
+
+# PubMatrixR 1.0.0
 
 ### Core functionality
 
@@ -47,7 +65,7 @@ This file is ordered with the most recent release at the top.
 - Removed pkgdown configuration/generated `doc/` artifacts and the bundled
   `pubmatrix-app` Shiny subproject files from the package source tree.
 
-## Changes in version 0.9.0
+# PubMatrixR 0.9.0
 
 - Finalized the pre-CRAN/Bioconductor-oriented package line after iterative
   "BioC optimization" updates and namespace fixes.

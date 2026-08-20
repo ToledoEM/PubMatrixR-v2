@@ -3,14 +3,20 @@
 export(PubMatrix)
 export(plot_pubmatrix_heatmap)
 export(pubmatrix_heatmap)
-importFrom(grDevices,colorRampPalette)
-importFrom(grDevices,dev.off)
-importFrom(grDevices,png)
+importFrom(grDevices,
+  colorRampPalette,
+  dev.off,
+  png
+)
 importFrom(pbapply,pblapply)
 importFrom(readODS,write_ods)
-importFrom(utils,URLencode)
-importFrom(utils,head)
-importFrom(utils,write.csv)
-importFrom(xml2,read_xml)
-importFrom(xml2,xml_find_first)
-importFrom(xml2,xml_text)
+importFrom(utils,
+  URLencode,
+  head,
+  write.csv
+)
+importFrom(xml2,
+  read_xml,
+  xml_find_first,
+  xml_text
+)

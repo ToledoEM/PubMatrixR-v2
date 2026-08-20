@@ -30,6 +30,12 @@ library(pheatmap)
 library(ggplot2)
 ```
 
+```{r setup-live-flag, include = FALSE}
+# Set PUBMATRIX_LIVE_VIGNETTE=true to query NCBI for real data when building
+# the site by hand. Unset (the default, including in CI) uses offline data.
+live <- identical(Sys.getenv("PUBMATRIX_LIVE_VIGNETTE"), "true")
+```
+
 ## Introduction
 
 PubMatrixR is an R package designed to analyze literature co-occurrence patterns by systematically searching PubMed and PMC databases. This vignette demonstrates how to:
@@ -42,7 +48,7 @@ PubMatrixR is an R package designed to analyze literature co-occurrence patterns
 
 ### Acknowledgments
 
-This package is a heavily fork of the original [PubMatrixR](https://github.com/tslaird/PubMatrixR) by tslaird. Our gratitude to the original author.
+This package is a heavy fork of the original [PubMatrixR](https://github.com/tslaird/PubMatrixR) by tslaird. Our gratitude to the original author.
 
 ### NCBI API Key (Recommended)
 
@@ -108,8 +114,7 @@ B <- c("LEPR", "ADIPOQ", "PPARG", "TNF", "IL6", "ADRB2", "INSR")
 
 Now we'll search for co-occurrences between our gene sets in PubMed literature:
 
-```{r pubmatrix_analysis, eval = FALSE}
-# Intentionally not run during package checks: this performs live NCBI queries.
+```{r pubmatrix_analysis, eval = live}
 # Run actual PubMatrix analysis
 current_year <- as.integer(format(Sys.Date(), "%Y"))
 result <- PubMatrix(
@@ -121,7 +126,7 @@ result <- PubMatrix(
 )
 ```
 
-```{r pubmatrix_analysis_offline}
+```{r pubmatrix_analysis_offline, eval = !live}
 # Offline deterministic example used for vignette rendering/package checks.
 result <- outer(seq_along(B), seq_along(A), function(i, j) {
   8 + (i * 6) + (j * 5) + ((i + j) %% 4) * 3 + ((i * j) %% 5)
@@ -262,8 +267,7 @@ plot_pubmatrix_heatmap(result,
 
 Asymmetric lists 
 
-```{r asymmetric_example, eval = FALSE}
-# Intentionally not run during package checks: this performs live NCBI queries.
+```{r asymmetric_example, eval = live}
 A <- c("NCOR2", "NCSTN", "NKD1", "NOTCH1", "NOTCH4", "NUMB", "PPARD", "PSEN2", "PTCH1", "RBPJ", "SKP2", "TCF7", "TP53")
 
 
@@ -281,7 +285,7 @@ result <- PubMatrix(
 )
 ```
 
-```{r asymmetric_example_offline}
+```{r asymmetric_example_offline, eval = !live}
 # Offline deterministic example used for vignette rendering/package checks.
 A <- c("NCOR2", "NCSTN", "NKD1", "NOTCH1", "NOTCH4", "NUMB", "PPARD", "PSEN2", "PTCH1", "RBPJ", "SKP2", "TCF7", "TP53")
 B <- c("EIF1", "EIF1AX", "EIF2B1", "EIF2B2", "EIF2B3", "EIF2B4", "EIF2B5", "EIF2S1", "EIF2S2", "EIF2S3", "ELAVL1")

@@ -4,12 +4,19 @@
 \alias{pubmatrix_heatmap}
 \title{Create a simple heatmap from PubMatrix results}
 \usage{
-pubmatrix_heatmap(matrix, title = "PubMatrix Results")
+pubmatrix_heatmap(
+  matrix,
+  title = "PubMatrix Results",
+  values = c("raw", "row_pct", "relative")
+)
 }
 \arguments{
 \item{matrix}{A numeric matrix from PubMatrix results}
 
 \item{title}{Character string for the heatmap title}
+
+\item{values}{Character scalar passed to [plot_pubmatrix_heatmap()]. Defaults
+to `"raw"` (co-occurrence counts).}
 }
 \value{
 A pheatmap object (invisible)

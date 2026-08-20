@@ -16,3 +16,6 @@
 ^_pkgdown\.yml$
 ^\.git($|/)
 ^\.Rproj\.user$
+^\.github$
+^codecov\.yml$
+^vignettes/pubmatrix_result_result\.(csv|ods)$
