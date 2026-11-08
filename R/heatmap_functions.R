@@ -9,9 +9,12 @@
 #'   `"row_pct"` (each cell as a percentage of its row total), or `"relative"`
 #'   (see Details).
 #' @param title Character string for the heatmap title. Default is "PubMatrix Co-occurrence Heatmap"
-#' @param cluster_rows Logical value determining if rows should be clustered using Euclidean distance. Default is TRUE
-#' @param cluster_cols Logical value determining if columns should be clustered using Euclidean distance. Default is TRUE
-#' @param show_numbers Logical value determining if overlap percentage values should be displayed in cells. Default is TRUE
+#' @param cluster_rows Logical value determining if rows should be clustered using Euclidean distance.
+#'   Default is TRUE
+#' @param cluster_cols Logical value determining if columns should be clustered using Euclidean distance.
+#'   Default is TRUE
+#' @param show_numbers Logical value determining if overlap percentage values should be displayed in cells.
+#'   Default is TRUE
 #' @param color_palette Color palette for the heatmap. Default uses a red gradient color scale
 #' @param filename Optional filename to save the heatmap. If NULL, displays the plot
 #' @param width Width of saved plot in inches. Default is 10
@@ -72,7 +75,7 @@ plot_pubmatrix_heatmap <- function(matrix,
                                    values = c("raw", "row_pct", "relative"),
                                    title = "PubMatrix Co-occurrence Heatmap",
                                    cluster_rows = TRUE,
-                                   cluster_cols = TRUE, 
+                                   cluster_cols = TRUE,
                                    show_numbers = TRUE,
                                    color_palette = NULL,
                                    filename = NULL,
@@ -110,7 +113,8 @@ plot_pubmatrix_heatmap <- function(matrix,
         # The matrix likely contains non-numeric strings (like HTML/Excel formulas)
         stop(
           "Input matrix is character-based and contains non-numeric data (e.g., formulas/HTML links). \n",
-          "Ensure you are passing the raw numeric count matrix (the direct output of PubMatrix) and not the CSV export data.",
+          "Ensure you are passing the raw numeric count matrix (the direct output of PubMatrix) ",
+          "and not the CSV export data.",
           call. = FALSE
         )
       }
@@ -140,8 +144,14 @@ plot_pubmatrix_heatmap <- function(matrix,
     matrix[is.na(matrix)] <- 0
 
     # Report back to the user which values were converted
-    message_output <- paste0("NA values found in the input matrix (", na_count, " total) and converted to 0 for overlap calculation.\n")
-    message_output <- paste0(message_output, "Converted positions (Row vs Col): \n- ", paste(head(na_positions, 10), collapse = "\n- "))
+    message_output <- paste0(
+      "NA values found in the input matrix (", na_count,
+      " total) and converted to 0 for overlap calculation.\n"
+    )
+    message_output <- paste0(
+      message_output, "Converted positions (Row vs Col): \n- ",
+      paste(head(na_positions, 10), collapse = "\n- ")
+    )
     if (na_count > 10) {
       message_output <- paste0(message_output, "\n- ... (and ", na_count - 10, " more)")
     }
@@ -266,7 +276,7 @@ plot_pubmatrix_heatmap <- function(matrix,
   # Expose what was plotted so callers (and tests) need not scrape grid grobs.
   attr(heatmap_plot, "plotted_values") <- display_matrix
 
-  return(invisible(heatmap_plot))
+  invisible(heatmap_plot)
 }
 
 #' Create a simple heatmap from PubMatrix results
