@@ -30,11 +30,14 @@ plot_pubmatrix_heatmap(
 
 \item{title}{Character string for the heatmap title. Default is "PubMatrix Co-occurrence Heatmap"}
 
-\item{cluster_rows}{Logical value determining if rows should be clustered using Euclidean distance. Default is TRUE}
+\item{cluster_rows}{Logical value determining if rows should be clustered using Euclidean distance.
+Default is TRUE}
 
-\item{cluster_cols}{Logical value determining if columns should be clustered using Euclidean distance. Default is TRUE}
+\item{cluster_cols}{Logical value determining if columns should be clustered using Euclidean distance.
+Default is TRUE}
 
-\item{show_numbers}{Logical value determining if overlap percentage values should be displayed in cells. Default is TRUE}
+\item{show_numbers}{Logical value determining if overlap percentage values should be displayed in cells.
+Default is TRUE}
 
 \item{color_palette}{Color palette for the heatmap. Default uses a red gradient color scale}
 

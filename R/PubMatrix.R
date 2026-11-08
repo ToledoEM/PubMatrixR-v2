@@ -101,8 +101,7 @@
 .pubmatrix_min_interval <- function(has_api_key) {
   default <- if (isTRUE(has_api_key)) 0.11 else 0.34
   interval <- getOption("PubMatrixR.min_interval", default)
-  if (!is.numeric(interval) || length(interval) != 1L || !is.finite(interval) ||
-      interval < 0) {
+  if (!is.numeric(interval) || length(interval) != 1L || !is.finite(interval) || interval < 0) {
     return(default)
   }
   interval
